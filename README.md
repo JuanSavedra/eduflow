@@ -1,73 +1,74 @@
-# React + TypeScript + Vite
+# EduFlow 🎓
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+EduFlow é uma plataforma de gestão educacional moderna e intuitiva, projetada para ajudar estudantes a monitorar seu desempenho acadêmico de forma eficiente. O sistema oferece uma visão clara de notas, frequências e interações escolares, tudo em uma interface responsiva e elegante.
 
-Currently, two official plugins are available:
+## ✨ Funcionalidades Principais
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **📊 Dashboard Inteligente**: Visualize sua média global, total de faltas e progresso em cada disciplina de forma rápida.
+- **📚 Gestão de Matérias**: Acompanhe o desempenho detalhado em cada disciplina, com indicadores visuais de aproveitamento.
+- **📝 Controle de Ocorrências**: Registre e monitore avisos, elogios e observações acadêmicas por matéria.
+- **🤖 Assistente de IA (Beta)**: Integração com inteligência artificial para auxiliar no planejamento de estudos e análise de desempenho.
+- **📱 Design Responsivo**: Interface totalmente adaptável para dispositivos móveis e desktop, utilizando as últimas tendências de UX/UI.
 
-## React Compiler
+## 🛠️ Tecnologias Utilizadas
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+O projeto foi construído com as tecnologias mais modernas do ecossistema JavaScript:
 
-## Expanding the ESLint configuration
+- **React 19**: Biblioteca principal para construção da interface.
+- **Vite 7**: Ferramenta de build extremamente rápida.
+- **Tailwind CSS v4**: Utilização da nova versão do framework para estilização performática e moderna.
+- **TypeScript**: Tipagem estática para maior segurança e produtividade no desenvolvimento.
+- **Lucide React**: Conjunto de ícones vetoriais elegantes e leves.
+- **Context API**: Gerenciamento de estado global da aplicação.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Como Executar o Projeto
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Pré-requisitos
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Instalação
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/id-educ.git
+   ```
+
+2. Entre no diretório do projeto:
+   ```bash
+   cd id-educ
+   ```
+
+3. Instale as dependências:
+   ```bash
+   npm install
+   ```
+
+### Desenvolvimento
+
+Para rodar o projeto em modo de desenvolvimento com Hot Module Replacement (HMR):
+
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+O projeto estará disponível em `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Para gerar a versão de produção otimizada:
+
+```bash
+npm run build
 ```
+
+## 📂 Estrutura do Projeto
+
+- `src/components`: Componentes reutilizáveis de UI e Layout.
+- `src/context`: Gerenciamento de estado global (AppContext).
+- `src/views`: Páginas principais da aplicação (Dashboard, Matérias, Ocorrências, IA).
+- `src/types`: Definições de tipos TypeScript.
+- `src/assets`: Recursos estáticos como imagens e ícones.
+
+---
+Desenvolvido com ❤️ para facilitar a vida acadêmica.
