@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
+import type { Occurrence } from '../types';
 
 interface OccurrenceFormInputs {
   title: string;
@@ -16,6 +17,7 @@ interface OccurrenceFormInputs {
 export const OccurrencesView: React.FC = () => {
   const { occurrences, subjects } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOccurrence, setSelectedOccurrence] = useState<Occurrence | null>(null);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<OccurrenceFormInputs>({
     defaultValues: {
@@ -153,9 +155,80 @@ export const OccurrencesView: React.FC = () => {
         </div>
       )}
 
+      {/* Modal Fixo de Detalhes da Ocorrência */}
+      {selectedOccurrence && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            onClick={() => setSelectedOccurrence(null)}
+          ></div>
+          
+          <Card className="relative w-full max-w-2xl bg-white shadow-2xl border-none overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className={`p-8 text-white flex justify-between items-start ${selectedOccurrence.type === 'Aviso' ? 'bg-amber-500' : 'bg-emerald-500'}`}>
+              <div className="flex gap-4">
+                <div className="p-3 bg-white/20 rounded-2xl">
+                  <AlertCircle size={32} />
+                </div>
+                <div>
+                  <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80">{selectedOccurrence.type} Acadêmico</span>
+                  <h3 className="text-3xl font-black mt-1 leading-tight">{selectedOccurrence.title}</h3>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedOccurrence(null)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-8 space-y-8">
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Disciplina Relacionada</p>
+                  <div className="flex items-center gap-2 text-slate-700 font-bold text-lg">
+                    <BookOpen size={20} className="text-indigo-500" />
+                    {selectedOccurrence.subject}
+                  </div>
+                </div>
+                <div className="space-y-1 text-right">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data do Registro</p>
+                  <div className="flex items-center gap-2 justify-end text-slate-700 font-bold text-lg">
+                    <Calendar size={20} className="text-indigo-500" />
+                    {selectedOccurrence.date}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Detalhamento da Ocorrência</p>
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-slate-600 leading-relaxed italic">
+                  "Esta é uma descrição detalhada fictícia da ocorrência. O sistema registrou este evento para acompanhamento pedagógico. 
+                  Em sistemas reais, aqui constariam os detalhes inseridos pelo corpo docente ou coordenação sobre o evento de {selectedOccurrence.title} 
+                  ocorrido na data de {selectedOccurrence.date}."
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <Button 
+                  onClick={() => setSelectedOccurrence(null)}
+                  className="px-8"
+                >
+                  Fechar Detalhes
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <div className="space-y-4">
       {occurrences.map(occ => (
-        <Card key={occ.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-all group">
+        <Card 
+          key={occ.id} 
+          onClick={() => setSelectedOccurrence(occ)}
+          className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-lg transition-all group cursor-pointer border-l-4 border-l-transparent hover:border-l-indigo-500"
+        >
           <div className="flex items-start gap-4">
             <div className={`p-3 rounded-xl transition-colors ${occ.type === 'Aviso' ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200'}`}>
               <AlertCircle size={24} />

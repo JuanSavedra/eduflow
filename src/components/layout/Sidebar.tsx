@@ -47,6 +47,24 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
       </nav>
+
+      <div className="p-4 space-y-4">
+        <Card className="p-4 bg-indigo-50 border-none">
+          <p className="text-xs font-bold text-indigo-700 uppercase mb-1">Status de Semestre</p>
+          <p className="text-xs text-indigo-600 mb-2">Você está no caminho certo!</p>
+          <div className="w-full bg-indigo-200 rounded-full h-1.5">
+            <div className="bg-indigo-600 h-1.5 rounded-full w-[65%]"></div>
+          </div>
+        </Card>
+
+        <button 
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors font-bold"
+        >
+          <LogOut size={20} />
+          Sair da Conta
+        </button>
+      </div>
     </aside>
   );
 };
