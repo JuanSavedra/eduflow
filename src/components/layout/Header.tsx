@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 export const Header: React.FC = () => {
   const { activeTab, logout } = useAppContext();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   return (
@@ -27,14 +28,66 @@ export const Header: React.FC = () => {
               className="bg-slate-100 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500 w-64"
             />
           </div>
-          <button className="relative p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors">
-            <Bell size={20} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => {
+                setIsNotificationsOpen(!isNotificationsOpen);
+                setIsProfileOpen(false);
+              }}
+              className="relative p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors group"
+            >
+              <Bell size={20} className="group-hover:text-indigo-600 transition-colors" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
+            </button>
+
+            {/* Modal/Dropdown Local de Notificações */}
+            {isNotificationsOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setIsNotificationsOpen(false)}
+                ></div>
+                <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-20 animate-in fade-in zoom-in duration-200 origin-top-right">
+                  <div className="px-5 py-3 border-b border-slate-50 flex justify-between items-center">
+                    <p className="text-sm font-bold text-slate-800">Notificações</p>
+                    <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-bold uppercase">3 Novas</span>
+                  </div>
+
+                  <div className="max-h-96 overflow-y-auto px-2 py-1">
+                    {[
+                      { id: 1, title: 'Nova nota postada', desc: 'Sua nota de Cálculo I foi publicada: 8.5', time: '5 min atrás', icon: '📝', color: 'bg-emerald-50' },
+                      { id: 2, title: 'Material de aula', desc: 'Professor Silva enviou novos slides de Algoritmos', time: '2 horas atrás', icon: '📚', color: 'bg-blue-50' },
+                      { id: 3, title: 'Lembrete de Aula', desc: 'Sua aula de História começa em 15 minutos', time: '15 min atrás', icon: '⏰', color: 'bg-amber-50' }
+                    ].map(notif => (
+                      <button key={notif.id} className="w-full text-left p-3 rounded-xl hover:bg-slate-50 transition-colors flex gap-4 items-start group">
+                        <div className={`w-10 h-10 shrink-0 ${notif.color} rounded-full flex items-center justify-center text-lg`}>
+                          {notif.icon}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{notif.title}</p>
+                          <p className="text-xs text-slate-500 leading-relaxed">{notif.desc}</p>
+                          <p className="text-[10px] text-slate-400 font-medium">{notif.time}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-2 pt-2 px-2 border-t border-slate-50">
+                    <button className="w-full py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                      Ver todas as notificações
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           
           <div className="relative">
             <button 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              onClick={() => {
+                setIsProfileOpen(!isProfileOpen);
+                setIsNotificationsOpen(false);
+              }}
               className="flex items-center gap-3 pl-4 border-l border-slate-200 hover:opacity-80 transition-opacity"
             >
               <div className="text-right hidden sm:block">
