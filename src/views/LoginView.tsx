@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { Card } from '../components/ui/Card';

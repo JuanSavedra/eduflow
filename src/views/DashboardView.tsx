@@ -1,4 +1,3 @@
-import React from 'react';
 import { BookOpen, TrendingUp, Clock } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { useAppContext } from '../context/AppContext';

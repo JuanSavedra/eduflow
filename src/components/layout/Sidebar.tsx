@@ -1,10 +1,8 @@
-import React from 'react';
-import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit, LogOut } from 'lucide-react';
-import { Card } from '../ui/Card';
+import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 export const Sidebar = () => {
-  const { activeTab, setActiveTab, logout } = useAppContext();
+  const { activeTab, setActiveTab } = useAppContext();
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col">

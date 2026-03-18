@@ -1,4 +1,3 @@
-import React from 'react';
 import './index.css';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { MainLayout } from './components/layout/MainLayout';

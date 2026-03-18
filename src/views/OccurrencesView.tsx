@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, AlertCircle, ChevronRight, X, Calendar, BookOpen, Save, FileText } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
