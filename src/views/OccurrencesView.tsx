@@ -1,23 +1,163 @@
-import React from 'react';
-import { Plus, AlertCircle, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, AlertCircle, ChevronRight, X, Calendar, BookOpen, Save, FileText } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
 
+interface OccurrenceFormInputs {
+  title: string;
+  date: string;
+  type: 'Aviso' | 'Elogio';
+  subject: string;
+  description?: string;
+}
+
 export const OccurrencesView: React.FC = () => {
-  const { occurrences } = useAppContext();
+  const { occurrences, subjects } = useAppContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<OccurrenceFormInputs>({
+    defaultValues: {
+      type: 'Aviso',
+      date: new Date().toISOString().split('T')[0]
+    }
+  });
+
+  const onSubmit = (data: OccurrenceFormInputs) => {
+    console.log("Nova ocorrência:", data);
+    setIsModalOpen(false);
+    reset();
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-slate-500">Histórico de observações e comportamentos acadêmicos.</p>
-        <Button variant="outline"><Plus size={16}/> Nova Ocorrência</Button>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Ocorrências Acadêmicas</h2>
+          <p className="text-slate-500 font-medium">Histórico de observações e comportamentos acadêmicos.</p>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)} className="py-3 px-6 shadow-indigo-100 shadow-xl scale-105 hover:scale-110 active:scale-95 transition-all">
+          <Plus size={22} /> Nova Ocorrência
+        </Button>
       </div>
+
+      {/* Modal Fixo de Nova Ocorrência */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => setIsModalOpen(false)}
+          ></div>
+          
+          <Card className="relative w-full max-w-xl bg-white shadow-2xl border-none overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-amber-500 p-6 text-white flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <AlertCircle size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Novo Registro</h3>
+                  <p className="text-amber-100 text-xs font-medium uppercase tracking-wider">Histórico do Aluno</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Título da Ocorrência</label>
+                <div className="relative">
+                  <FileText size={18} className="absolute left-3 top-3.5 text-slate-400" />
+                  <input 
+                    {...register("title", { required: "O título é obrigatório" })}
+                    placeholder="Ex: Entrega de trabalho em atraso"
+                    className={`w-full p-3 pl-10 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all ${errors.title ? 'border-rose-500 bg-rose-50' : 'border-slate-200 focus:border-amber-500'}`}
+                  />
+                </div>
+                {errors.title && <p className="text-xs text-rose-500 font-bold">{errors.title.message}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Data</label>
+                  <div className="relative">
+                    <Calendar size={18} className="absolute left-3 top-3.5 text-slate-400" />
+                    <input 
+                      type="date"
+                      {...register("date", { required: "A data é obrigatória" })}
+                      className="w-full p-3 pl-10 border border-slate-200 rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Tipo</label>
+                  <select 
+                    {...register("type")}
+                    className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none focus:border-amber-500 bg-white"
+                  >
+                    <option value="Aviso">⚠️ Aviso / Observação</option>
+                    <option value="Elogio">✨ Elogio / Destaque</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Disciplina Relacionada</label>
+                <div className="relative">
+                  <BookOpen size={18} className="absolute left-3 top-3.5 text-slate-400" />
+                  <select 
+                    {...register("subject", { required: "Selecione a disciplina" })}
+                    className={`w-full p-3 pl-10 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-white ${errors.subject ? 'border-rose-500 bg-rose-50' : 'border-slate-200 focus:border-amber-500'}`}
+                  >
+                    <option value="">Selecione uma matéria...</option>
+                    {subjects.map(sub => (
+                      <option key={sub.id} value={sub.name}>{sub.name}</option>
+                    ))}
+                  </select>
+                </div>
+                {errors.subject && <p className="text-xs text-rose-500 font-bold">{errors.subject.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Descrição Detalhada (Opcional)</label>
+                <textarea 
+                  {...register("description")}
+                  placeholder="Descreva o ocorrido com mais detalhes..."
+                  rows={3}
+                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none focus:border-amber-500 resize-none"
+                ></textarea>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" className="flex-1 bg-amber-500 hover:bg-amber-600 border-none">
+                  <Save size={18} /> Registrar Ocorrência
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      )}
+
       <div className="space-y-4">
       {occurrences.map(occ => (
-        <Card key={occ.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Card key={occ.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-all group">
           <div className="flex items-start gap-4">
-            <div className={`p-3 rounded-xl ${occ.type === 'Aviso' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'}`}>
+            <div className={`p-3 rounded-xl transition-colors ${occ.type === 'Aviso' ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200'}`}>
               <AlertCircle size={24} />
             </div>
             <div>
@@ -30,7 +170,7 @@ export const OccurrencesView: React.FC = () => {
               <p className="text-xs text-slate-400 font-bold uppercase">Data do Registro</p>
               <p className="text-sm font-medium text-slate-600">{occ.date}</p>
             </div>
-            <ChevronRight className="text-slate-300 hidden md:block" />
+            <ChevronRight className="text-slate-300 hidden md:block group-hover:translate-x-1 transition-transform" />
           </div>
         </Card>
       ))}
