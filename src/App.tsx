@@ -8,6 +8,7 @@ import { OccurrencesView } from './views/OccurrencesView';
 import { AIView } from './views/AIView';
 import { LoginView } from './views/LoginView';
 import { RegisterView } from './views/RegisterView';
+import { SettingsView } from './views/SettingsView';
 
 const AppContent: React.FC = () => {
   const { activeTab, isAuthenticated } = useAppContext();
@@ -32,6 +33,7 @@ const AppContent: React.FC = () => {
       {activeTab === 'subjects' && <SubjectsView />}
       {activeTab === 'occurrences' && <OccurrencesView />}
       {activeTab === 'ai' && <AIView />}
+      {activeTab === 'settings' && <SettingsView />}
     </MainLayout>
   );
 };

@@ -3,7 +3,7 @@ import { Search, Bell, Settings, LogOut, Moon, Sun, ChevronRight } from 'lucide-
 import { useAppContext } from '../../context/AppContext';
 
 export const Header: React.FC = () => {
-  const { activeTab, logout } = useAppContext();
+  const { activeTab, logout, setActiveTab } = useAppContext();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -15,7 +15,8 @@ export const Header: React.FC = () => {
           <h2 className="text-xl font-bold text-slate-800 capitalize">
             {activeTab === 'ai' ? 'Consultoria Inteligente' : 
              activeTab === 'subjects' ? 'Gerenciamento de Matérias' : 
-             activeTab === 'occurrences' ? 'Registro de Ocorrências' : 'Painel Geral'}
+             activeTab === 'occurrences' ? 'Registro de Ocorrências' : 
+             activeTab === 'settings' ? 'Configurações da Conta' : 'Painel Geral'}
           </h2>
         </div>
 
@@ -113,7 +114,13 @@ export const Header: React.FC = () => {
                   </div>
 
                   <div className="px-2 space-y-1">
-                    <button className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors group">
+                    <button 
+                      onClick={() => {
+                        setActiveTab('settings');
+                        setIsProfileOpen(false);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors group"
+                    >
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all">
                           <Settings size={18} />
