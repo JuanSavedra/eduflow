@@ -5,6 +5,9 @@ interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
 }
 
 interface AuthContextData {
@@ -15,6 +18,7 @@ interface AuthContextData {
   signIn(credentials: any): Promise<void>;
   signUp(credentials: any): Promise<void>;
   signOut(): void;
+  updateProfile(data: Partial<User>): Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -72,6 +76,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setToken(null);
   }
 
+  async function updateProfile(data: Partial<User>) {
+    const response = await api.patch('/users/profile', data);
+    const updatedUser = response.data;
+
+    setUser(updatedUser);
+    localStorage.setItem('@EduFlow:user', JSON.stringify(updatedUser));
+  }
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -81,7 +93,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         loading, 
         signIn, 
         signUp, 
-        signOut 
+        signOut,
+        updateProfile
       }}
     >
       {children}

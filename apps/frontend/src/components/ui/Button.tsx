@@ -1,27 +1,23 @@
 import { type ReactNode } from 'react';
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  onClick?: () => void;
   variant?: "primary" | "secondary" | "danger" | "outline";
-  className?: string;
-  type?: "button" | "submit" | "reset";
   size?: "sm" | "md" | "lg";
 }
 
 export const Button = ({ 
   children, 
-  onClick, 
   variant = "primary", 
   className = "", 
-  type = "button",
-  size = "md"
+  size = "md",
+  ...props
 }: ButtonProps) => {
   const variants = {
-    primary: "bg-indigo-600 text-white hover:bg-indigo-700",
-    secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200",
-    danger: "bg-rose-50 text-rose-600 hover:bg-rose-100",
-    outline: "border border-slate-300 text-slate-600 hover:bg-slate-50"
+    primary: "bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed",
+    secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed",
+    danger: "bg-rose-50 text-rose-600 hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed",
+    outline: "border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
   };
   
   const sizes = {
@@ -32,9 +28,8 @@ export const Button = ({
 
   return (
     <button 
-      type={type}
-      onClick={onClick}
       className={`rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${variants[variant]} ${sizes[size]} ${className}`}
+      {...props}
     >
       {children}
     </button>

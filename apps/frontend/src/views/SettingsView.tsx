@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  User, 
+  User as UserIcon, 
   Lock, 
   History, 
   Shield, 
@@ -15,18 +15,53 @@ import {
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 export const SettingsView = () => {
+  const { user, updateProfile } = useAuth();
   const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'history'>('profile');
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Dados fictícios do usuário
+  // Dados do usuário inicializados com os dados do AuthContext (Supabase)
   const [userData, setUserData] = useState({
-    name: 'Gabriel Souza',
-    email: 'gabriel.souza@edu.br',
-    phone: '(11) 98765-4321',
-    location: 'São Paulo, SP',
-    bio: 'Estudante de Engenharia de Software no 5º semestre. Apaixonado por tecnologia e educação.'
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    location: user?.location || '',
+    bio: user?.bio || ''
   });
+
+  // Atualiza o estado local se o usuário do contexto mudar
+  useEffect(() => {
+    if (user) {
+      setUserData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        location: user.location || '',
+        bio: user.bio || ''
+      });
+    }
+  }, [user]);
+
+  // Função para pegar as iniciais do nome do usuário
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await updateProfile(userData);
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao atualizar perfil.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Histórico fictício
   const accountHistory = [
@@ -50,7 +85,7 @@ export const SettingsView = () => {
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
-            <User size={18} />
+            <UserIcon size={18} />
             Perfil Pessoal
           </button>
           <button 
@@ -84,15 +119,15 @@ export const SettingsView = () => {
               <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-slate-100 dark:border-slate-800">
                 <div className="relative">
                   <div className="w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-3xl flex items-center justify-center text-3xl font-bold border-4 border-white dark:border-slate-900 shadow-xl">
-                    GS
+                    {getInitials(userData.name)}
                   </div>
                   <button className="absolute -bottom-2 -right-2 p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 hover:scale-110 transition-transform">
-                    <User size={16} />
+                    <UserIcon size={16} />
                   </button>
                 </div>
                 <div className="text-center sm:text-left">
-                  <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Gabriel Souza</h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">gabriel.souza@edu.br</p>
+                  <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">{userData.name || 'Usuário'}</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">{userData.email || 'carregando...'}</p>
                   <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                     <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded-full uppercase tracking-wider">Estudante Premium</span>
                     <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-full uppercase tracking-wider">Conta Verificada</span>
@@ -104,7 +139,7 @@ export const SettingsView = () => {
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Completo</label>
                   <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors" size={18} />
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors" size={18} />
                     <input 
                       type="text" 
                       value={userData.name}
@@ -165,10 +200,25 @@ export const SettingsView = () => {
               </div>
 
               <div className="flex justify-end pt-4 gap-3">
-                <Button variant="outline">Descartar Alterações</Button>
-                <Button className="gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => user && setUserData({
+                    name: user.name || '',
+                    email: user.email || '',
+                    phone: user.phone || '',
+                    location: user.location || '',
+                    bio: user.bio || ''
+                  })}
+                >
+                  Descartar Alterações
+                </Button>
+                <Button 
+                  className="gap-2"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
                   <Save size={18} />
-                  Salvar Alterações
+                  {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
               </div>
             </Card>
