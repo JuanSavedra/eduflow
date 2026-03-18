@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Mail, Lock, Eye, EyeOff, UserPlus, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, UserPlus, ArrowLeft, User, AlertCircle, Loader2 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 interface RegisterFormInputs {
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -13,15 +15,30 @@ interface RegisterFormInputs {
 
 export const RegisterView = () => {
   const { setActiveTab } = useAppContext();
+  const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormInputs>();
 
   const password = watch("password");
 
-  const onSubmit = (data: RegisterFormInputs) => {
-    console.log("Register data:", data);
-    alert("Conta criada com sucesso! Agora faça seu login.");
-    setActiveTab('login');
+  const onSubmit = async (data: RegisterFormInputs) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await signUp({ 
+        name: data.name, 
+        email: data.email, 
+        password: data.password 
+      });
+    } catch (err: any) {
+      console.error("Erro no registro:", err);
+      setError(err.response?.data?.message || 'Ocorreu um erro ao criar sua conta. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,8 +49,31 @@ export const RegisterView = () => {
           <p className="text-lg text-slate-500 dark:text-slate-400 mt-4">Junte-se a milhares de estudantes e organize sua vida acadêmica</p>
         </div>
 
+        {error && (
+          <div className="mb-8 p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center gap-3 text-rose-700 dark:text-rose-400 animate-in shake duration-500">
+            <AlertCircle size={20} />
+            <p className="font-medium">{error}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
           <div className="grid grid-cols-1 gap-7">
+            <div className="space-y-3">
+              <label className="text-base font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <User size={20} className="text-indigo-500" />
+                Seu nome completo
+              </label>
+              <div className="relative">
+                <input
+                  {...register("name", { required: "Nome é obrigatório" })}
+                  disabled={isLoading}
+                  className={`w-full px-5 py-4 text-lg border rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${errors.name ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-indigo-500'}`}
+                  placeholder="Seu Nome"
+                />
+                {errors.name && <p className="text-sm text-rose-500 mt-2 font-medium">{errors.name.message}</p>}
+              </div>
+            </div>
+
             <div className="space-y-3">
               <label className="text-base font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                 <Mail size={20} className="text-indigo-500" />
@@ -45,6 +85,7 @@ export const RegisterView = () => {
                     required: "E-mail é obrigatório", 
                     pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "E-mail inválido" } 
                   })}
+                  disabled={isLoading}
                   className={`w-full px-5 py-4 text-lg border rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${errors.email ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-indigo-500'}`}
                   placeholder="seu.nome@universidade.edu"
                 />
@@ -62,6 +103,7 @@ export const RegisterView = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     {...register("password", { required: "Senha é obrigatória", minLength: { value: 6, message: "Mínimo 6 caracteres" } })}
+                    disabled={isLoading}
                     className={`w-full px-5 py-4 text-lg border rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${errors.password ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-indigo-500'}`}
                     placeholder="••••••••"
                   />
@@ -88,6 +130,7 @@ export const RegisterView = () => {
                       required: "Confirmação é obrigatória",
                       validate: (val: string) => val === password || "As senhas não coincidem"
                     })}
+                    disabled={isLoading}
                     className={`w-full px-5 py-4 text-lg border rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${errors.confirmPassword ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-indigo-500'}`}
                     placeholder="••••••••"
                   />
@@ -98,9 +141,22 @@ export const RegisterView = () => {
           </div>
 
           <div className="pt-6">
-            <Button type="submit" className="w-full py-5 text-xl font-black shadow-xl shadow-indigo-100 dark:shadow-indigo-900/40 hover:scale-[1.01] active:scale-[0.99] transition-all">
-              Finalizar Cadastro e Começar
-              <UserPlus size={24} />
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full py-5 text-xl font-black shadow-xl shadow-indigo-100 dark:shadow-indigo-900/40 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  Criando conta...
+                  <Loader2 size={24} className="animate-spin" />
+                </>
+              ) : (
+                <>
+                  Finalizar Cadastro e Começar
+                  <UserPlus size={24} />
+                </>
+              )}
             </Button>
           </div>
         </form>

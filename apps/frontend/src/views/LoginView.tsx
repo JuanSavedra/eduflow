@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, AlertCircle, Loader2 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginFormInputs {
   email: string;
@@ -12,13 +13,25 @@ interface LoginFormInputs {
 }
 
 export const LoginView = () => {
-  const { login, setActiveTab } = useAppContext();
+  const { setActiveTab } = useAppContext();
+  const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
 
-  const onSubmit = (data: LoginFormInputs) => {
-    console.log("Login data:", data);
-    login();
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await signIn({ email: data.email, password: data.password });
+    } catch (err: any) {
+      console.error("Erro no login:", err);
+      setError(err.response?.data?.message || 'Ocorreu um erro ao tentar entrar. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -28,6 +41,13 @@ export const LoginView = () => {
           <h2 className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Bem-vindo de volta!</h2>
           <p className="text-lg text-slate-500 dark:text-slate-400 mt-3">Acesse sua conta EduFlow para continuar seus estudos</p>
         </div>
+
+        {error && (
+          <div className="mb-8 p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center gap-3 text-rose-700 dark:text-rose-400 animate-in shake duration-500">
+            <AlertCircle size={20} />
+            <p className="font-medium">{error}</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="space-y-3">
@@ -41,6 +61,7 @@ export const LoginView = () => {
                   required: "E-mail é obrigatório", 
                   pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "E-mail inválido" } 
                 })}
+                disabled={isLoading}
                 className={`w-full px-5 py-4 text-lg border rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${errors.email ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-indigo-500'}`}
                 placeholder="exemplo@instituicao.edu.br"
               />
@@ -60,6 +81,7 @@ export const LoginView = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 {...register("password", { required: "Senha é obrigatória", minLength: { value: 6, message: "Mínimo 6 caracteres" } })}
+                disabled={isLoading}
                 className={`w-full px-5 py-4 text-lg border rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${errors.password ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-indigo-500'}`}
                 placeholder="••••••••••••"
               />
@@ -84,9 +106,22 @@ export const LoginView = () => {
             <label htmlFor="remember" className="text-base text-slate-600 dark:text-slate-400 cursor-pointer font-medium select-none">Mantenha-me conectado neste dispositivo</label>
           </div>
 
-          <Button type="submit" className="w-full py-4 text-lg font-bold shadow-lg shadow-indigo-200 dark:shadow-indigo-900/40 hover:scale-[1.01] active:scale-[0.99] transition-transform">
-            Entrar no Sistema
-            <LogIn size={22} />
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full py-4 text-lg font-bold shadow-lg shadow-indigo-200 dark:shadow-indigo-900/40 hover:scale-[1.01] active:scale-[0.99] transition-transform disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <>
+                Entrando...
+                <Loader2 size={22} className="animate-spin" />
+              </>
+            ) : (
+              <>
+                Entrar no Sistema
+                <LogIn size={22} />
+              </>
+            )}
           </Button>
         </form>
 

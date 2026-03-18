@@ -1,11 +1,19 @@
 import { useState } from 'react';
-import { Search, Bell, Settings, LogOut, Moon, Sun, ChevronRight } from 'lucide-react';
+import { Search, Bell, Settings, LogOut, Moon, Sun, ChevronRight, User } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const Header = () => {
-  const { activeTab, logout, setActiveTab, isDarkMode, toggleDarkMode } = useAppContext();
+  const { activeTab, setActiveTab, isDarkMode, toggleDarkMode } = useAppContext();
+  const { user, signOut } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  // Função para pegar as iniciais do nome do usuário
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 sticky top-0 z-20 transition-colors">
@@ -40,19 +48,15 @@ export const Header = () => {
               <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
             </button>
 
-            {/* Modal/Dropdown Local de Notificações */}
+            {/* Dropdown de Notificações */}
             {isNotificationsOpen && (
               <>
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setIsNotificationsOpen(false)}
-                ></div>
+                <div className="fixed inset-0 z-10" onClick={() => setIsNotificationsOpen(false)}></div>
                 <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-3 z-20 animate-in fade-in zoom-in duration-200 origin-top-right">
                   <div className="px-5 py-3 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center">
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Notificações</p>
                     <span className="text-[10px] bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-bold uppercase">3 Novas</span>
                   </div>
-
                   <div className="max-h-96 overflow-y-auto px-2 py-1">
                     {[
                       { id: 1, title: 'Nova nota postada', desc: 'Sua nota de Cálculo I foi publicada: 8.5', time: '5 min atrás', icon: '📝', color: 'bg-emerald-50 dark:bg-emerald-900/20' },
@@ -60,9 +64,7 @@ export const Header = () => {
                       { id: 3, title: 'Lembrete de Aula', desc: 'Sua aula de História começa em 15 minutos', time: '15 min atrás', icon: '⏰', color: 'bg-amber-50 dark:bg-amber-900/20' }
                     ].map(notif => (
                       <button key={notif.id} className="w-full text-left p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex gap-4 items-start group">
-                        <div className={`w-10 h-10 shrink-0 ${notif.color} rounded-full flex items-center justify-center text-lg`}>
-                          {notif.icon}
-                        </div>
+                        <div className={`w-10 h-10 shrink-0 ${notif.color} rounded-full flex items-center justify-center text-lg`}>{notif.icon}</div>
                         <div className="space-y-1">
                           <p className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{notif.title}</p>
                           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{notif.desc}</p>
@@ -70,12 +72,6 @@ export const Header = () => {
                         </div>
                       </button>
                     ))}
-                  </div>
-
-                  <div className="mt-2 pt-2 px-2 border-t border-slate-50 dark:border-slate-800">
-                    <button className="w-full py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
-                      Ver todas as notificações
-                    </button>
                   </div>
                 </div>
               </>
@@ -91,25 +87,22 @@ export const Header = () => {
               className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-800 hover:opacity-80 transition-opacity"
             >
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Gabriel Souza</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Estudante de Engenharia</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">{user?.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Estudante</p>
               </div>
               <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-bold ring-2 ring-transparent hover:ring-indigo-200 dark:hover:ring-indigo-900/50 transition-all">
-                GS
+                {getInitials(user?.name)}
               </div>
             </button>
 
-            {/* Modal/Dropdown Local do Perfil */}
+            {/* Dropdown de Perfil */}
             {isProfileOpen && (
               <>
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setIsProfileOpen(false)}
-                ></div>
+                <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)}></div>
                 <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-3 z-20 animate-in fade-in zoom-in duration-200 origin-top-right">
                   <div className="px-5 py-3 border-b border-slate-50 dark:border-slate-800 mb-2">
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Minha Conta</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">gabriel.souza@edu.br</p>
+                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user?.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user?.email}</p>
                   </div>
 
                   <div className="px-2 space-y-1">
@@ -149,9 +142,9 @@ export const Header = () => {
                     <button 
                       onClick={() => {
                         setIsProfileOpen(false);
-                        logout();
+                        signOut();
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                     >
                       <div className="p-2 bg-rose-50 dark:bg-rose-900/20 rounded-lg">
                         <LogOut size={18} />
