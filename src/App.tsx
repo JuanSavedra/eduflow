@@ -28,10 +28,6 @@ const AppContent: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="bg-indigo-600 text-white p-4 mb-4 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold">EduFlow Refatorado</h1>
-        <p className="text-indigo-100">O Tailwind deve estar funcionando se você ver este bloco azul.</p>
-      </div>
       {activeTab === 'dashboard' && <DashboardView />}
       {activeTab === 'subjects' && <SubjectsView />}
       {activeTab === 'occurrences' && <OccurrencesView />}
