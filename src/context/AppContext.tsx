@@ -5,6 +5,9 @@ import type { Subject, Occurrence, TabType } from '../types';
 interface AppContextData {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
+  isAuthenticated: boolean;
+  login: () => void;
+  logout: () => void;
   subjects: Subject[];
   occurrences: Occurrence[];
   newSubjectName: string;
@@ -21,7 +24,18 @@ interface AppContextData {
 const AppContext = createContext<AppContextData | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('login');
+
+  const login = () => {
+    setIsAuthenticated(true);
+    setActiveTab('dashboard');
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setActiveTab('login');
+  };
   const [subjects, setSubjects] = useState<Subject[]>([
     { id: 1, name: 'Cálculo I', grades: [8.5, 7.0, 9.2], absences: 4 },
     { id: 2, name: 'História Geral', grades: [9.5, 10], absences: 2 },
@@ -77,6 +91,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AppContext.Provider value={{
       activeTab, setActiveTab,
+      isAuthenticated, login, logout,
       subjects, occurrences,
       newSubjectName, setNewSubjectName,
       calculateAverage, globalAverage, totalAbsences,

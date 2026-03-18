@@ -1,10 +1,10 @@
 import React from 'react';
-import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit, LogOut } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useAppContext } from '../../context/AppContext';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab } = useAppContext();
+  const { activeTab, setActiveTab, logout } = useAppContext();
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col">
@@ -56,6 +56,14 @@ export const Sidebar: React.FC = () => {
             <div className="bg-indigo-600 h-1.5 rounded-full w-[65%]"></div>
           </div>
         </Card>
+        
+        <button 
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-4 py-3 mt-4 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors font-semibold"
+        >
+          <LogOut size={20} />
+          Sair da Conta
+        </button>
       </div>
     </aside>
   );
