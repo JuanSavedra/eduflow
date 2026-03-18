@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Bell, Settings, LogOut, Moon, Sun, ChevronRight } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
-export const Header: React.FC = () => {
+export const Header = () => {
   const { activeTab, logout, setActiveTab } = useAppContext();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);

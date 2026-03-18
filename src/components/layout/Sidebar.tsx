@@ -3,7 +3,7 @@ import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit, LogOut } from 'lu
 import { Card } from '../ui/Card';
 import { useAppContext } from '../../context/AppContext';
 
-export const Sidebar: React.FC = () => {
+export const Sidebar = () => {
   const { activeTab, setActiveTab, logout } = useAppContext();
 
   return (

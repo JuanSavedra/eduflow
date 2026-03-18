@@ -14,7 +14,7 @@ interface OccurrenceFormInputs {
   description?: string;
 }
 
-export const OccurrencesView: React.FC = () => {
+export const OccurrencesView = () => {
   const { occurrences, subjects } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOccurrence, setSelectedOccurrence] = useState<Occurrence | null>(null);

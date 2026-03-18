@@ -4,7 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
 
-export const AIView: React.FC = () => {
+export const AIView = () => {
   const { subjects, calculateAverage } = useAppContext();
 
   // Lógica simples de análise para simular IA

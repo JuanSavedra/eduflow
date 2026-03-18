@@ -7,7 +7,7 @@ interface ButtonProps {
   className?: string;
 }
 
-export const Button: React.FC<ButtonProps> = ({ children, onClick, variant = "primary", className = "" }) => {
+export const Button = ({ children, onClick, variant = "primary", className = "" }: ButtonProps) => {
   const variants = {
     primary: "bg-indigo-600 text-white hover:bg-indigo-700",
     secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200",

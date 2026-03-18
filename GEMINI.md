@@ -29,7 +29,7 @@ O projeto segue uma estrutura organizada por responsabilidades:
 - `npm run lint`: Executa o linter para verificar padrões de código.
 
 ## 📏 Convenções de Desenvolvimento
-- **Componentes**: Devem ser funcionais (`React.FC`) e utilizar desestruturação de props.
+- **Componentes**: Devem ser funcionais e utilizar tipagem direta nas props, evitando o uso de `React.FC`. Utilizar desestruturação de props na assinatura da função.
 - **Estilização**: Priorizar classes utilitárias do Tailwind CSS v4. Evitar CSS puro, exceto para configurações globais em `index.css`.
 - **Estado**: Estados que precisam persistir entre trocas de aba (views) devem ser mantidos no `AppContext`.
 - **Nomenclatura**: Arquivos de componentes em PascalCase (ex: `MainLayout.tsx`). Tipos e interfaces em PascalCase.

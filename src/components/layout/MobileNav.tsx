@@ -2,7 +2,7 @@ import React from 'react';
 import { LayoutDashboard, BookOpen, BrainCircuit } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
-export const MobileNav: React.FC = () => {
+export const MobileNav = () => {
   const { activeTab, setActiveTab } = useAppContext();
 
   return (

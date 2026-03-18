@@ -11,7 +11,7 @@ interface RegisterFormInputs {
   confirmPassword: string;
 }
 
-export const RegisterView: React.FC = () => {
+export const RegisterView = () => {
   const { setActiveTab } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormInputs>();

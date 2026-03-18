@@ -10,7 +10,7 @@ import { LoginView } from './views/LoginView';
 import { RegisterView } from './views/RegisterView';
 import { SettingsView } from './views/SettingsView';
 
-const AppContent: React.FC = () => {
+const AppContent = () => {
   const { activeTab, isAuthenticated } = useAppContext();
 
   if (!isAuthenticated) {
@@ -38,7 +38,7 @@ const AppContent: React.FC = () => {
   );
 };
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <AppProvider>
       <AppContent />

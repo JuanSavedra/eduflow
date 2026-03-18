@@ -16,7 +16,7 @@ interface GradeFormInputs {
   grade: number;
 }
 
-export const SubjectsView: React.FC = () => {
+export const SubjectsView = () => {
   const { 
     subjects, removeSubject, 
     updateAbsences, calculateAverage 

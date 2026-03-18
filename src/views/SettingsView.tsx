@@ -17,7 +17,7 @@ import {
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 
-export const SettingsView: React.FC = () => {
+export const SettingsView = () => {
   const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'history'>('profile');
 
   // Dados fictícios do usuário

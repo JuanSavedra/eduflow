@@ -11,7 +11,7 @@ interface LoginFormInputs {
   remember: boolean;
 }
 
-export const LoginView: React.FC = () => {
+export const LoginView = () => {
   const { login, setActiveTab } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
