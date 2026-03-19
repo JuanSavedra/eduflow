@@ -1,6 +1,8 @@
 export interface Subject {
-  id: number;
+  id: string;
   name: string;
+  teacher?: string;
+  semester?: string;
   grades: number[];
   absences: number;
 }

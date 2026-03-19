@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, X, BookOpen, GraduationCap, Clock, Save } from 'lucide-react';
+import { Plus, Trash2, X, BookOpen, GraduationCap, Clock, Save, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -9,7 +9,6 @@ interface SubjectFormInputs {
   name: string;
   teacher?: string;
   semester?: string;
-  targetGrade?: number;
 }
 
 interface GradeFormInputs {
@@ -19,31 +18,70 @@ interface GradeFormInputs {
 export const SubjectsView = () => {
   const { 
     subjects, removeSubject, 
-    updateAbsences, calculateAverage 
+    updateAbsences, calculateAverage,
+    addSubject, addGrade
   } = useAppContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
-  const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<SubjectFormInputs>();
   const gradeForm = useForm<GradeFormInputs>();
 
-  const onSubmitSubject = (data: SubjectFormInputs) => {
-    console.log("Nova matéria:", data);
-    setIsModalOpen(false);
-    reset();
+  const onSubmitSubject = async (data: SubjectFormInputs) => {
+    try {
+      setIsSubmitting(true);
+      await addSubject(data);
+      setIsModalOpen(false);
+      reset();
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao salvar matéria.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const onSubmitGrade = (data: GradeFormInputs) => {
-    console.log(`Nova nota para matéria ${selectedSubjectId}:`, data);
-    setIsGradeModalOpen(false);
-    gradeForm.reset();
+  const onSubmitGrade = async (data: GradeFormInputs) => {
+    if (!selectedSubjectId) return;
+    try {
+      setIsSubmitting(true);
+      // Converte para número caso venha como string do input
+      const gradeValue = Number(data.grade);
+      await addGrade(selectedSubjectId, gradeValue);
+      setIsGradeModalOpen(false);
+      gradeForm.reset();
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao salvar nota.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const openGradeModal = (id: number) => {
+  const openGradeModal = (id: string) => {
     setSelectedSubjectId(id);
     setIsGradeModalOpen(true);
+  };
+
+  const handleUpdateAbsences = async (id: string, delta: number) => {
+    try {
+      await updateAbsences(id, delta);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRemoveSubject = async (id: string) => {
+    if (confirm("Deseja realmente remover esta matéria?")) {
+      try {
+        await removeSubject(id);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
   return (
@@ -63,7 +101,7 @@ export const SubjectsView = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div 
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => !isSubmitting && setIsModalOpen(false)}
           ></div>
           
           <Card className="relative w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl border-none overflow-hidden animate-in zoom-in-95 duration-200">
@@ -78,7 +116,7 @@ export const SubjectsView = () => {
                 </div>
               </div>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => !isSubmitting && setIsModalOpen(false)}
                 className="p-2 hover:bg-white/10 rounded-full transition-colors"
               >
                 <X size={20} />
@@ -90,6 +128,7 @@ export const SubjectsView = () => {
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nome da Matéria</label>
                 <input 
                   {...register("name", { required: "O nome da matéria é obrigatório" })}
+                  disabled={isSubmitting}
                   placeholder="Ex: Cálculo Diferencial I"
                   className={`w-full p-3 border rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${errors.name ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-indigo-500'}`}
                 />
@@ -103,6 +142,7 @@ export const SubjectsView = () => {
                     <GraduationCap size={16} className="absolute left-3 top-3.5 text-slate-400" />
                     <input 
                       {...register("teacher")}
+                      disabled={isSubmitting}
                       placeholder="Docente"
                       className="w-full p-3 pl-10 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none focus:border-indigo-500"
                     />
@@ -114,6 +154,7 @@ export const SubjectsView = () => {
                     <Clock size={16} className="absolute left-3 top-3.5 text-slate-400" />
                     <input 
                       {...register("semester")}
+                      disabled={isSubmitting}
                       placeholder="2024.1"
                       className="w-full p-3 pl-10 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 outline-none focus:border-indigo-500"
                     />
@@ -122,11 +163,12 @@ export const SubjectsView = () => {
               </div>
 
               <div className="pt-4 flex gap-3">
-                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1">
+                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting} className="flex-1">
                   Cancelar
                 </Button>
-                <Button type="submit" className="flex-1">
-                  <Save size={18} /> Salvar Matéria
+                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                  {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} 
+                  {isSubmitting ? 'Salvando...' : 'Salvar Matéria'}
                 </Button>
               </div>
             </form>
@@ -139,7 +181,7 @@ export const SubjectsView = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div 
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            onClick={() => setIsGradeModalOpen(false)}
+            onClick={() => !isSubmitting && setIsGradeModalOpen(false)}
           ></div>
           
           <Card className="relative w-full max-w-sm bg-white dark:bg-slate-900 shadow-2xl border-none overflow-hidden animate-in zoom-in-95 duration-200">
@@ -148,7 +190,7 @@ export const SubjectsView = () => {
                 <Plus size={20} />
                 <h3 className="font-bold">Lançar Nova Nota</h3>
               </div>
-              <button onClick={() => setIsGradeModalOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">
+              <button onClick={() => !isSubmitting && setIsGradeModalOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">
                 <X size={18} />
               </button>
             </div>
@@ -162,6 +204,7 @@ export const SubjectsView = () => {
                   type="number"
                   step="0.1"
                   autoFocus
+                  disabled={isSubmitting}
                   {...gradeForm.register("grade", { 
                     required: "Informe o valor",
                     min: { value: 0, message: "Mínimo 0" },
@@ -175,11 +218,11 @@ export const SubjectsView = () => {
               </div>
 
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsGradeModalOpen(false)} className="flex-1">
+                <Button type="button" variant="outline" onClick={() => setIsGradeModalOpen(false)} disabled={isSubmitting} className="flex-1">
                   Cancelar
                 </Button>
-                <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 border-none">
-                  Salvar Nota
+                <Button type="submit" disabled={isSubmitting} className="flex-1 bg-emerald-600 hover:bg-emerald-700 border-none">
+                  {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : 'Salvar Nota'}
                 </Button>
               </div>
             </form>
@@ -191,8 +234,11 @@ export const SubjectsView = () => {
         {subjects.length > 0 ? subjects.map(sub => (
           <Card key={sub.id} className="p-6 hover:shadow-md transition-all">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{sub.name}</h3>
-              <button onClick={() => removeSubject(sub.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{sub.name}</h3>
+                {sub.teacher && <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Prof. {sub.teacher}</p>}
+              </div>
+              <button onClick={() => handleRemoveSubject(sub.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors">
                 <Trash2 size={18} />
               </button>
             </div>
@@ -221,9 +267,9 @@ export const SubjectsView = () => {
                 <div>
                   <p className="text-xs text-slate-500 dark:text-slate-500 font-bold uppercase">Faltas</p>
                   <div className="flex items-center gap-3 mt-1">
-                    <button onClick={() => updateAbsences(sub.id, -1)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-600 dark:text-slate-400">-</button>
+                    <button onClick={() => handleUpdateAbsences(sub.id, -1)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-600 dark:text-slate-400">-</button>
                     <span className="text-lg font-bold text-slate-700 dark:text-slate-200">{sub.absences}h</span>
-                    <button onClick={() => updateAbsences(sub.id, 1)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-600 dark:text-slate-400">+</button>
+                    <button onClick={() => handleUpdateAbsences(sub.id, 1)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-600 dark:text-slate-400">+</button>
                   </div>
                 </div>
                 <div className="text-right">

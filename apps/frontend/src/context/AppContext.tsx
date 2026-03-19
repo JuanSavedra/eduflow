@@ -1,26 +1,28 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useMemo, useEffect, type ReactNode } from 'react';
 import type { Subject, Occurrence } from '../types';
+import api from '../services/api';
+import { useAuth } from './AuthContext';
 
 interface AppContextData {
   subjects: Subject[];
   occurrences: Occurrence[];
-  newSubjectName: string;
-  setNewSubjectName: (name: string) => void;
   calculateAverage: (grades: number[]) => string;
   globalAverage: string | number;
   totalAbsences: number;
-  addSubject: () => void;
-  removeSubject: (id: number) => void;
-  updateAbsences: (id: number, delta: number) => void;
-  addGrade: (id: number) => void;
+  addSubject: (data: { name: string; teacher?: string; semester?: string }) => Promise<void>;
+  removeSubject: (id: string) => Promise<void>;
+  updateAbsences: (id: string, delta: number) => Promise<void>;
+  addGrade: (id: string, grade: number) => Promise<void>;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  refreshSubjects: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextData | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const { signed } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark';
@@ -40,10 +42,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [occurrences] = useState<Occurrence[]>([]);
-  const [newSubjectName, setNewSubjectName] = useState('');
+
+  const refreshSubjects = async () => {
+    if (!signed) return;
+    try {
+      const response = await api.get('/subjects');
+      setSubjects(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar matérias:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (signed) {
+      refreshSubjects();
+    } else {
+      setSubjects([]);
+    }
+  }, [signed]);
 
   const calculateAverage = (grades: number[]) => {
-    if (grades.length === 0) return "0.0";
+    if (!grades || grades.length === 0) return "0.0";
     const sum = grades.reduce((a, b) => a + b, 0);
     return (sum / grades.length).toFixed(1);
   };
@@ -55,41 +74,62 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const totalAbsences = subjects.reduce((acc, sub) => acc + sub.absences, 0);
 
-  const addSubject = () => {
-    if (!newSubjectName.trim()) return;
-    const newSub: Subject = {
-      id: Date.now(),
-      name: newSubjectName,
-      grades: [],
-      absences: 0
-    };
-    setSubjects([...subjects, newSub]);
-    setNewSubjectName('');
+  const addSubject = async (data: { name: string; teacher?: string; semester?: string }) => {
+    try {
+      const response = await api.post('/subjects', data);
+      setSubjects(prev => [...prev, response.data]);
+    } catch (error) {
+      console.error("Erro ao adicionar matéria:", error);
+      throw error;
+    }
   };
 
-  const removeSubject = (id: number) => {
-    setSubjects(subjects.filter(s => s.id !== id));
+  const removeSubject = async (id: string) => {
+    try {
+      await api.delete(`/subjects/${id}`);
+      setSubjects(prev => prev.filter(s => s.id !== id));
+    } catch (error) {
+      console.error("Erro ao remover matéria:", error);
+      throw error;
+    }
   };
 
-  const updateAbsences = (id: number, delta: number) => {
-    setSubjects(subjects.map(s => s.id === id ? { ...s, absences: Math.max(0, s.absences + delta) } : s));
+  const updateAbsences = async (id: string, delta: number) => {
+    const subject = subjects.find(s => s.id === id);
+    if (!subject) return;
+    
+    const newAbsences = Math.max(0, subject.absences + delta);
+    
+    try {
+      const response = await api.patch(`/subjects/${id}`, { absences: newAbsences });
+      setSubjects(prev => prev.map(s => s.id === id ? response.data : s));
+    } catch (error) {
+      console.error("Erro ao atualizar faltas:", error);
+      throw error;
+    }
   };
 
-  const addGrade = (id: number) => {
-    const gradeStr = prompt("Digite a nota (0-10):");
-    if (!gradeStr) return;
-    const grade = parseFloat(gradeStr.replace(',', '.'));
-    if (isNaN(grade) || grade < 0 || grade > 10) return;
-    setSubjects(subjects.map(s => s.id === id ? { ...s, grades: [...s.grades, grade] } : s));
+  const addGrade = async (id: string, grade: number) => {
+    const subject = subjects.find(s => s.id === id);
+    if (!subject) return;
+    
+    const newGrades = [...subject.grades, grade];
+    
+    try {
+      const response = await api.patch(`/subjects/${id}`, { grades: newGrades });
+      setSubjects(prev => prev.map(s => s.id === id ? response.data : s));
+    } catch (error) {
+      console.error("Erro ao adicionar nota:", error);
+      throw error;
+    }
   };
 
   return (
     <AppContext.Provider value={{
       subjects, occurrences,
-      newSubjectName, setNewSubjectName,
       calculateAverage, globalAverage, totalAbsences,
       addSubject, removeSubject, updateAbsences, addGrade,
-      isDarkMode, toggleDarkMode
+      isDarkMode, toggleDarkMode, refreshSubjects
     }}>
       {children}
     </AppContext.Provider>
