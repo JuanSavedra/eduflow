@@ -5,8 +5,6 @@ import {
   History, 
   Shield, 
   Mail, 
-  Phone, 
-  MapPin,
   Save,
   Trash2,
   Clock,
@@ -25,10 +23,7 @@ export const SettingsView = () => {
   // Dados do usuário inicializados com os dados do AuthContext (Supabase)
   const [userData, setUserData] = useState({
     name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    location: user?.location || '',
-    bio: user?.bio || ''
+    email: user?.email || ''
   });
 
   // Atualiza o estado local se o usuário do contexto mudar
@@ -36,10 +31,7 @@ export const SettingsView = () => {
     if (user) {
       setUserData({
         name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        location: user.location || '',
-        bio: user.bio || ''
+        email: user.email || ''
       });
     }
   }, [user]);
@@ -161,42 +153,6 @@ export const SettingsView = () => {
                     />
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Telefone</label>
-                  <div className="relative group">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors" size={18} />
-                    <input 
-                      type="text" 
-                      value={userData.phone}
-                      onChange={(e) => setUserData({...userData, phone: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-100 dark:focus:border-indigo-900/50 focus:bg-white dark:focus:bg-slate-900 rounded-2xl py-3 pl-12 pr-4 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-all outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Localização</label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors" size={18} />
-                    <input 
-                      type="text" 
-                      value={userData.location}
-                      onChange={(e) => setUserData({...userData, location: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-100 dark:focus:border-indigo-900/50 focus:bg-white dark:focus:bg-slate-900 rounded-2xl py-3 pl-12 pr-4 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-all outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Bio / Sobre Mim</label>
-                <textarea 
-                  rows={4}
-                  value={userData.bio}
-                  onChange={(e) => setUserData({...userData, bio: e.target.value})}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-100 dark:focus:border-indigo-900/50 focus:bg-white dark:focus:bg-slate-900 rounded-2xl py-4 px-5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-all outline-none resize-none"
-                />
               </div>
 
               <div className="flex justify-end pt-4 gap-3">
@@ -204,10 +160,7 @@ export const SettingsView = () => {
                   variant="outline"
                   onClick={() => user && setUserData({
                     name: user.name || '',
-                    email: user.email || '',
-                    phone: user.phone || '',
-                    location: user.location || '',
-                    bio: user.bio || ''
+                    email: user.email || ''
                   })}
                 >
                   Descartar Alterações

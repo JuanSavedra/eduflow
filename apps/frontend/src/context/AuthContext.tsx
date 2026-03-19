@@ -5,9 +5,6 @@ interface User {
   id: string;
   name: string;
   email: string;
-  phone?: string;
-  location?: string;
-  bio?: string;
 }
 
 interface AuthContextData {

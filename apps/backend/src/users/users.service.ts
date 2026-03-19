@@ -44,7 +44,7 @@ export class UsersService {
     return bcrypt.compare(password, hash);
   }
 
-  async updateProfile(id: string, data: Partial<{ name: string; phone: string; location: string; bio: string }>) {
+  async updateProfile(id: string, data: Partial<{ name: string }>) {
     const results = await this.db
       .update(schema.users)
       .set({
