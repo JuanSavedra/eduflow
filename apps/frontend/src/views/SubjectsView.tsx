@@ -188,7 +188,7 @@ export const SubjectsView = () => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {subjects.map(sub => (
+        {subjects.length > 0 ? subjects.map(sub => (
           <Card key={sub.id} className="p-6 hover:shadow-md transition-all">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{sub.name}</h3>
@@ -235,7 +235,20 @@ export const SubjectsView = () => {
               </div>
             </div>
           </Card>
-        ))}
+        )) : (
+          <Card className="col-span-full py-20 flex flex-col items-center justify-center border-dashed border-2 border-slate-200 dark:border-slate-800 bg-transparent shadow-none">
+            <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 dark:text-indigo-400 rounded-3xl flex items-center justify-center mb-6 animate-bounce duration-[3000ms]">
+              <BookOpen size={40} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-center">Nenhuma matéria cadastrada</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-8 px-4 text-sm font-medium">
+              Comece adicionando as disciplinas que você está cursando neste semestre para acompanhar seu desempenho.
+            </p>
+            <Button onClick={() => setIsModalOpen(true)} variant="outline" className="gap-2 border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+              <Plus size={18} /> Adicionar minha primeira matéria
+            </Button>
+          </Card>
+        )}
       </div>
     </div>
   );

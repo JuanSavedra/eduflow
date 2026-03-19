@@ -95,29 +95,40 @@ export const DashboardView = () => {
         Atributos Acadêmicos
       </h3>
     </div>
-    <div className="h-[300px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-          <PolarGrid stroke={isDarkMode ? "#334155" : "#e2e8f0"} />
-          <PolarAngleAxis dataKey="subject" tick={{ fill: isDarkMode ? '#94a3b8' : '#64748b', fontSize: 12, fontWeight: 600 }} />
-          <Radar
-            name="Média"
-            dataKey="nota"
-            stroke="#6366f1"
-            fill="#6366f1"
-            fillOpacity={0.6}
-          />
-          <Tooltip 
-            contentStyle={{ 
-              borderRadius: '12px', 
-              border: 'none', 
-              backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-              color: isDarkMode ? '#f1f5f9' : '#1e293b',
-              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
-            }}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
+    <div className="h-[300px] w-full flex items-center justify-center">
+      {subjects.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+            <PolarGrid stroke={isDarkMode ? "#334155" : "#e2e8f0"} />
+            <PolarAngleAxis dataKey="subject" tick={{ fill: isDarkMode ? '#94a3b8' : '#64748b', fontSize: 12, fontWeight: 600 }} />
+            <Radar
+              name="Média"
+              dataKey="nota"
+              stroke="#6366f1"
+              fill="#6366f1"
+              fillOpacity={0.6}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                borderRadius: '12px', 
+                border: 'none', 
+                backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+                color: isDarkMode ? '#f1f5f9' : '#1e293b',
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+              }}
+            />
+          </RadarChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="text-center px-6">
+          <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-700">
+            <TrendingUp size={32} />
+          </div>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-500 italic">
+            Adicione matérias para visualizar o radar de desempenho acadêmico.
+          </p>
+        </div>
+      )}
     </div>
   </Card>
 
@@ -129,35 +140,46 @@ export const DashboardView = () => {
               Distribuição de Ocorrências
             </h3>
           </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                >
-                  {pieData.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-                    color: isDarkMode ? '#f1f5f9' : '#1e293b',
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
-                  }}
-                />
-                <Legend verticalAlign="bottom" height={36}/>
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            {occurrences.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  >
+                    {pieData.map((_entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: '12px', 
+                      border: 'none', 
+                      backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+                      color: isDarkMode ? '#f1f5f9' : '#1e293b',
+                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
+                    }}
+                  />
+                  <Legend verticalAlign="bottom" height={36}/>
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center px-6">
+                <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-700">
+                  <AlertCircle size={32} />
+                </div>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-500 italic">
+                  Nenhuma ocorrência registrada para gerar este gráfico.
+                </p>
+              </div>
+            )}
           </div>
         </Card>
 

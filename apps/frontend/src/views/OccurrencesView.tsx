@@ -223,7 +223,7 @@ export const OccurrencesView = () => {
       )}
 
       <div className="space-y-4">
-      {occurrences.map(occ => (
+      {occurrences.length > 0 ? occurrences.map(occ => (
         <Card 
           key={occ.id} 
           onClick={() => setSelectedOccurrence(occ)}
@@ -246,7 +246,17 @@ export const OccurrencesView = () => {
             <ChevronRight className="text-slate-300 dark:text-slate-700 hidden md:block group-hover:translate-x-1 transition-transform" />
           </div>
         </Card>
-      ))}
+      )) : (
+        <Card className="py-20 flex flex-col items-center justify-center border-dashed border-2 border-slate-200 dark:border-slate-800 bg-transparent shadow-none">
+          <div className="w-20 h-20 bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 rounded-3xl flex items-center justify-center mb-6 animate-bounce duration-[3000ms]">
+            <AlertCircle size={40} />
+          </div>
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-center">Sem ocorrências registradas</h3>
+          <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-8 px-4 text-sm font-medium">
+            Aqui aparecerão seus avisos, elogios e observações acadêmicas registradas pelo corpo docente ou coordenação.
+          </p>
+        </Card>
+      )}
       </div>
     </div>
   );
