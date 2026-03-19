@@ -35,17 +35,17 @@ export const DashboardView = () => {
   // Dados para o Gráfico de Barras (Faltas por Mês - Simulado)
   const monthlyAbsencesData = [
     { name: 'Jan', faltas: 0 },
-    { name: 'Fev', faltas: 2 },
-    { name: 'Mar', faltas: 5 },
-    { name: 'Abr', faltas: 3 },
-    { name: 'Mai', faltas: 4 },
-    { name: 'Jun', faltas: 1 },
+    { name: 'Fev', faltas: 0 },
+    { name: 'Mar', faltas: 0 },
+    { name: 'Abr', faltas: 0 },
+    { name: 'Mai', faltas: 0 },
+    { name: 'Jun', faltas: 0 },
     { name: 'Jul', faltas: 0 },
-    { name: 'Ago', faltas: 3 },
-    { name: 'Set', faltas: 2 },
-    { name: 'Out', faltas: 6 },
-    { name: 'Nov', faltas: 4 },
-    { name: 'Dez', faltas: 1 },
+    { name: 'Ago', faltas: 0 },
+    { name: 'Set', faltas: 0 },
+    { name: 'Out', faltas: 0 },
+    { name: 'Nov', faltas: 0 },
+    { name: 'Dez', faltas: 0 },
   ];
 
   return (
@@ -94,7 +94,6 @@ export const DashboardView = () => {
         <TrendingUp size={20} className="text-indigo-600 dark:text-indigo-400" />
         Atributos Acadêmicos
       </h3>
-      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded-full uppercase">Radar RPG</span>
     </div>
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">

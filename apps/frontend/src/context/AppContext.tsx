@@ -54,15 +54,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setIsAuthenticated(false);
     setActiveTab('login');
   };
-  const [subjects, setSubjects] = useState<Subject[]>([
-    { id: 1, name: 'Cálculo I', grades: [8.5, 7.0, 9.2], absences: 4 },
-    { id: 2, name: 'História Geral', grades: [9.5, 10], absences: 2 },
-    { id: 3, name: 'Algoritmos', grades: [6.5, 5.0], absences: 8 },
-  ]);
-  const [occurrences] = useState<Occurrence[]>([
-    { id: 1, date: '2023-10-15', title: 'Entrega Atrasada', type: 'Aviso', subject: 'Cálculo I' },
-    { id: 2, date: '2023-11-02', title: 'Destaque Acadêmico', type: 'Elogio', subject: 'História Geral' }
-  ]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [occurrences] = useState<Occurrence[]>([]);
   const [newSubjectName, setNewSubjectName] = useState('');
 
   const calculateAverage = (grades: number[]) => {

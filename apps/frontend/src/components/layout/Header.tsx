@@ -45,7 +45,6 @@ export const Header = () => {
               className="relative p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors group"
             >
               <Bell size={20} className="group-hover:text-indigo-600 transition-colors" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
             </button>
 
             {/* Dropdown de Notificações */}
@@ -55,23 +54,12 @@ export const Header = () => {
                 <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-3 z-20 animate-in fade-in zoom-in duration-200 origin-top-right">
                   <div className="px-5 py-3 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center">
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Notificações</p>
-                    <span className="text-[10px] bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-bold uppercase">3 Novas</span>
                   </div>
-                  <div className="max-h-96 overflow-y-auto px-2 py-1">
-                    {[
-                      { id: 1, title: 'Nova nota postada', desc: 'Sua nota de Cálculo I foi publicada: 8.5', time: '5 min atrás', icon: '📝', color: 'bg-emerald-50 dark:bg-emerald-900/20' },
-                      { id: 2, title: 'Material de aula', desc: 'Professor Silva enviou novos slides de Algoritmos', time: '2 horas atrás', icon: '📚', color: 'bg-blue-50 dark:bg-blue-900/20' },
-                      { id: 3, title: 'Lembrete de Aula', desc: 'Sua aula de História começa em 15 minutos', time: '15 min atrás', icon: '⏰', color: 'bg-amber-50 dark:bg-amber-900/20' }
-                    ].map(notif => (
-                      <button key={notif.id} className="w-full text-left p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex gap-4 items-start group">
-                        <div className={`w-10 h-10 shrink-0 ${notif.color} rounded-full flex items-center justify-center text-lg`}>{notif.icon}</div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{notif.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{notif.desc}</p>
-                          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{notif.time}</p>
-                        </div>
-                      </button>
-                    ))}
+                  <div className="max-h-96 overflow-y-auto px-5 py-8 text-center">
+                    <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+                      <Bell size={20} />
+                    </div>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-500 italic">Você não possui novas notificações no momento.</p>
                   </div>
                 </div>
               </>

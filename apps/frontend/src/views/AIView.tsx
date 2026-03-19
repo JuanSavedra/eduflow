@@ -74,9 +74,7 @@ export const AIView = () => {
       <Card className="p-6 bg-slate-900 dark:bg-black/40 border-none">
         <h3 className="text-lg font-bold mb-4 text-white dark:text-slate-100">Dica Rápida da IA</h3>
         <p className="text-slate-400 dark:text-slate-500 text-sm leading-relaxed italic">
-          "Baseado no seu histórico, você costuma ter melhor desempenho em matérias de Humanas. 
-          Tente aplicar técnicas de memorização visual (Mapas Mentais) para suas matérias de Exatas, 
-          isso pode elevar sua média em {subjects.find(s => s.name === 'Algoritmos')?.name || 'Algoritmos'}."
+          "Olá! Quando você adicionar suas matérias e notas, eu poderei analisar seu desempenho e fornecer dicas personalizadas para ajudar no seu sucesso acadêmico."
         </p>
       </Card>
     </div>
