@@ -1,12 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useMemo, useEffect, type ReactNode } from 'react';
+import type { Subject, Occurrence } from '../types';
 
 interface AppContextData {
-  activeTab: TabType;
-  setActiveTab: (tab: TabType) => void;
-  isAuthenticated: boolean;
-  login: () => void;
-  logout: () => void;
   subjects: Subject[];
   occurrences: Occurrence[];
   newSubjectName: string;
@@ -25,8 +21,6 @@ interface AppContextData {
 const AppContext = createContext<AppContextData | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('login');
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark';
@@ -44,16 +38,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
-
-  const login = () => {
-    setIsAuthenticated(true);
-    setActiveTab('dashboard');
-  };
-
-  const logout = () => {
-    setIsAuthenticated(false);
-    setActiveTab('login');
-  };
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [occurrences] = useState<Occurrence[]>([]);
   const [newSubjectName, setNewSubjectName] = useState('');
@@ -101,8 +85,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AppContext.Provider value={{
-      activeTab, setActiveTab,
-      isAuthenticated, login, logout,
       subjects, occurrences,
       newSubjectName, setNewSubjectName,
       calculateAverage, globalAverage, totalAbsences,

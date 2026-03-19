@@ -1,15 +1,25 @@
 import { useState } from 'react';
-import { Search, Bell, Settings, LogOut, Moon, Sun, ChevronRight, User } from 'lucide-react';
+import { Search, Bell, Settings, LogOut, Moon, Sun, ChevronRight } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 
 export const Header = () => {
-  const { activeTab, setActiveTab, isDarkMode, toggleDarkMode } = useAppContext();
+  const { isDarkMode, toggleDarkMode } = useAppContext();
   const { user, signOut } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Função para pegar as iniciais do nome do usuário
+  const getPageTitle = () => {
+    if (location.pathname.includes('/ai')) return 'Consultoria Inteligente';
+    if (location.pathname.includes('/subjects')) return 'Gerenciamento de Matérias';
+    if (location.pathname.includes('/occurrences')) return 'Registro de Ocorrências';
+    if (location.pathname.includes('/settings')) return 'Configurações da Conta';
+    return 'Painel Geral';
+  };
+
   const getInitials = (name?: string) => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -20,10 +30,7 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 capitalize">
-            {activeTab === 'ai' ? 'Consultoria Inteligente' : 
-             activeTab === 'subjects' ? 'Gerenciamento de Matérias' : 
-             activeTab === 'occurrences' ? 'Registro de Ocorrências' : 
-             activeTab === 'settings' ? 'Configurações da Conta' : 'Painel Geral'}
+            {getPageTitle()}
           </h2>
         </div>
 
@@ -47,7 +54,6 @@ export const Header = () => {
               <Bell size={20} className="group-hover:text-indigo-600 transition-colors" />
             </button>
 
-            {/* Dropdown de Notificações */}
             {isNotificationsOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setIsNotificationsOpen(false)}></div>
@@ -83,7 +89,6 @@ export const Header = () => {
               </div>
             </button>
 
-            {/* Dropdown de Perfil */}
             {isProfileOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)}></div>
@@ -96,7 +101,7 @@ export const Header = () => {
                   <div className="px-2 space-y-1">
                     <button 
                       onClick={() => {
-                        setActiveTab('settings');
+                        navigate('/settings');
                         setIsProfileOpen(false);
                       }}
                       className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group"

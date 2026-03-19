@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Mail, Lock, Eye, EyeOff, UserPlus, ArrowLeft, User, AlertCircle, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 
 interface RegisterFormInputs {
@@ -14,8 +14,8 @@ interface RegisterFormInputs {
 }
 
 export const RegisterView = () => {
-  const { setActiveTab } = useAppContext();
   const { signUp } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +33,7 @@ export const RegisterView = () => {
         email: data.email, 
         password: data.password 
       });
+      navigate('/dashboard');
     } catch (err: any) {
       console.error("Erro no registro:", err);
       setError(err.response?.data?.message || 'Ocorreu um erro ao criar sua conta. Tente novamente.');
@@ -162,13 +163,13 @@ export const RegisterView = () => {
         </form>
 
         <div className="mt-12 text-center border-t border-slate-100 dark:border-slate-800 pt-8">
-          <button 
-            onClick={() => setActiveTab('login')}
+          <Link 
+            to="/login"
             className="text-lg font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:underline flex items-center justify-center gap-3 mx-auto transition-all group"
           >
             <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
             Já possui uma conta acadêmica? Entre aqui
-          </button>
+          </Link>
         </div>
       </Card>
     </div>

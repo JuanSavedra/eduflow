@@ -1,5 +1,3 @@
-export type TabType = 'dashboard' | 'subjects' | 'occurrences' | 'ai' | 'login' | 'register' | 'settings';
-
 export interface Subject {
   id: number;
   name: string;

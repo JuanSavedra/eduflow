@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Mail, Lock, Eye, EyeOff, LogIn, AlertCircle, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 
 interface LoginFormInputs {
@@ -13,8 +13,8 @@ interface LoginFormInputs {
 }
 
 export const LoginView = () => {
-  const { setActiveTab } = useAppContext();
   const { signIn } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +26,7 @@ export const LoginView = () => {
       setIsLoading(true);
       setError(null);
       await signIn({ email: data.email, password: data.password });
+      navigate('/dashboard');
     } catch (err: any) {
       console.error("Erro no login:", err);
       setError(err.response?.data?.message || 'Ocorreu um erro ao tentar entrar. Tente novamente.');
@@ -128,12 +129,12 @@ export const LoginView = () => {
         <div className="mt-12 text-center pt-8 border-t border-slate-100 dark:border-slate-800">
           <p className="text-base text-slate-500 dark:text-slate-500">
             Ainda não tem acesso?{' '}
-            <button 
-              onClick={() => setActiveTab('register')}
+            <Link 
+              to="/register"
               className="font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:underline transition-all"
             >
               Cadastre-se agora
-            </button>
+            </Link>
           </p>
         </div>
       </Card>
