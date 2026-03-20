@@ -14,9 +14,12 @@ interface AppContextData {
   removeSubject: (id: string) => Promise<void>;
   updateAbsences: (id: string, delta: number) => Promise<void>;
   addGrade: (id: string, grade: number) => Promise<void>;
+  addOccurrence: (data: Omit<Occurrence, 'id'>) => Promise<void>;
+  removeOccurrence: (id: string) => Promise<void>;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
   refreshSubjects: () => Promise<void>;
+  refreshOccurrences: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextData | undefined>(undefined);
@@ -41,7 +44,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [occurrences] = useState<Occurrence[]>([]);
+  const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
 
   const refreshSubjects = async () => {
     if (!signed) return;
@@ -53,11 +56,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshOccurrences = async () => {
+    if (!signed) return;
+    try {
+      const response = await api.get('/occurrences');
+      setOccurrences(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar ocorrências:", error);
+    }
+  };
+
   useEffect(() => {
     if (signed) {
       refreshSubjects();
+      refreshOccurrences();
     } else {
       setSubjects([]);
+      setOccurrences([]);
     }
   }, [signed]);
 
@@ -124,12 +139,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addOccurrence = async (data: Omit<Occurrence, 'id'>) => {
+    try {
+      const response = await api.post('/occurrences', data);
+      setOccurrences(prev => [...prev, response.data]);
+    } catch (error) {
+      console.error("Erro ao adicionar ocorrência:", error);
+      throw error;
+    }
+  };
+
+  const removeOccurrence = async (id: string) => {
+    try {
+      await api.delete(`/occurrences/${id}`);
+      setOccurrences(prev => prev.filter(o => o.id !== id));
+    } catch (error) {
+      console.error("Erro ao remover ocorrência:", error);
+      throw error;
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       subjects, occurrences,
       calculateAverage, globalAverage, totalAbsences,
       addSubject, removeSubject, updateAbsences, addGrade,
-      isDarkMode, toggleDarkMode, refreshSubjects
+      addOccurrence, removeOccurrence,
+      isDarkMode, toggleDarkMode, refreshSubjects, refreshOccurrences
     }}>
       {children}
     </AppContext.Provider>

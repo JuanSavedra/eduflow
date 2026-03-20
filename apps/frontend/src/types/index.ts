@@ -8,9 +8,11 @@ export interface Subject {
 }
 
 export interface Occurrence {
-  id: number;
+  id: string;
+  name: string;
+  description: string;
+  subjectId: string;
+  subjectName: string;
+  category: 'Falta' | 'Atraso' | 'Advertência' | 'Suspensão';
   date: string;
-  title: string;
-  type: 'Aviso' | 'Elogio';
-  subject: string;
 }

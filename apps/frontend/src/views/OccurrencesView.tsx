@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, AlertCircle, ChevronRight, X, Calendar, BookOpen, Save, FileText } from 'lucide-react';
+import { Plus, AlertCircle, ChevronRight, X, Calendar, BookOpen, Save, FileText, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -7,29 +7,73 @@ import { useAppContext } from '../context/AppContext';
 import type { Occurrence } from '../types';
 
 interface OccurrenceFormInputs {
-  title: string;
+  name: string;
   date: string;
-  type: 'Aviso' | 'Elogio';
-  subject: string;
-  description?: string;
+  category: 'Falta' | 'Atraso' | 'Advertência' | 'Suspensão';
+  subjectId: string;
+  description: string;
 }
 
 export const OccurrencesView = () => {
-  const { occurrences, subjects } = useAppContext();
+  const { occurrences, subjects, addOccurrence, removeOccurrence } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOccurrence, setSelectedOccurrence] = useState<Occurrence | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<OccurrenceFormInputs>({
     defaultValues: {
-      type: 'Aviso',
+      category: 'Falta',
       date: new Date().toISOString().split('T')[0]
     }
   });
 
-  const onSubmit = (data: OccurrenceFormInputs) => {
-    console.log("Nova ocorrência:", data);
-    setIsModalOpen(false);
-    reset();
+  const onSubmit = async (data: OccurrenceFormInputs) => {
+    try {
+      const subject = subjects.find(s => s.id === data.subjectId);
+      await addOccurrence({
+        ...data,
+        subjectName: subject?.name || 'N/A'
+      });
+      setIsModalOpen(false);
+      reset();
+    } catch (error) {
+      console.error("Erro ao salvar ocorrência:", error);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm('Tem certeza que deseja excluir esta ocorrência?')) {
+      setIsDeleting(id);
+      try {
+        await removeOccurrence(id);
+        if (selectedOccurrence?.id === id) setSelectedOccurrence(null);
+      } catch (error) {
+        console.error("Erro ao remover ocorrência:", error);
+      } finally {
+        setIsDeleting(null);
+      }
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'Falta': return 'bg-amber-500';
+      case 'Atraso': return 'bg-orange-500';
+      case 'Advertência': return 'bg-rose-500';
+      case 'Suspensão': return 'bg-slate-900';
+      default: return 'bg-indigo-500';
+    }
+  };
+
+  const getCategoryBadgeStyle = (category: string) => {
+    switch (category) {
+      case 'Falta': return 'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400';
+      case 'Atraso': return 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400';
+      case 'Advertência': return 'bg-rose-100 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400';
+      case 'Suspensão': return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
+      default: return 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400';
+    }
   };
 
   return (
@@ -44,7 +88,7 @@ export const OccurrencesView = () => {
         </Button>
       </div>
 
-      {/* Modal Fixo de Nova Ocorrência */}
+      {/* Modal de Nova Ocorrência */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div 
@@ -73,16 +117,16 @@ export const OccurrencesView = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Título da Ocorrência</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nome da Ocorrência</label>
                 <div className="relative">
                   <FileText size={18} className="absolute left-3 top-3.5 text-slate-400" />
                   <input 
-                    {...register("title", { required: "O título é obrigatório" })}
+                    {...register("name", { required: "O nome é obrigatório" })}
                     placeholder="Ex: Entrega de trabalho em atraso"
-                    className={`w-full p-3 pl-10 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all ${errors.title ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-amber-500'}`}
+                    className={`w-full p-3 pl-10 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all ${errors.name ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-amber-500'}`}
                   />
                 </div>
-                {errors.title && <p className="text-xs text-rose-500 font-bold">{errors.title.message}</p>}
+                {errors.name && <p className="text-xs text-rose-500 font-bold">{errors.name.message}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -99,13 +143,15 @@ export const OccurrencesView = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tipo</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Categoria</label>
                   <select 
-                    {...register("type")}
+                    {...register("category", { required: "Selecione uma categoria" })}
                     className="w-full p-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none focus:border-amber-500"
                   >
-                    <option value="Aviso">⚠️ Aviso / Observação</option>
-                    <option value="Elogio">✨ Elogio / Destaque</option>
+                    <option value="Falta">❌ Falta</option>
+                    <option value="Atraso">⏰ Atraso</option>
+                    <option value="Advertência">⚠️ Advertência</option>
+                    <option value="Suspensão">🚫 Suspensão</option>
                   </select>
                 </div>
               </div>
@@ -115,26 +161,27 @@ export const OccurrencesView = () => {
                 <div className="relative">
                   <BookOpen size={18} className="absolute left-3 top-3.5 text-slate-400" />
                   <select 
-                    {...register("subject", { required: "Selecione a disciplina" })}
-                    className={`w-full p-3 pl-10 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 ${errors.subject ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 focus:border-amber-500'}`}
+                    {...register("subjectId", { required: "Selecione a disciplina" })}
+                    className={`w-full p-3 pl-10 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 ${errors.subjectId ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 focus:border-amber-500'}`}
                   >
                     <option value="">Selecione uma matéria...</option>
                     {subjects.map(sub => (
-                      <option key={sub.id} value={sub.name}>{sub.name}</option>
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
                     ))}
                   </select>
                 </div>
-                {errors.subject && <p className="text-xs text-rose-500 font-bold">{errors.subject.message}</p>}
+                {errors.subjectId && <p className="text-xs text-rose-500 font-bold">{errors.subjectId.message}</p>}
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Descrição Detalhada (Opcional)</label>
                 <textarea 
                   {...register("description")}
-                  placeholder="Descreva o ocorrido com mais detalhes..."
+                  placeholder="Descreva o ocorrido com detalhes..."
                   rows={3}
-                  className="w-full p-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none focus:border-amber-500 resize-none"
+                  className={`w-full p-3 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 resize-none ${errors.description ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 focus:border-amber-500'}`}
                 ></textarea>
+                {errors.description && <p className="text-xs text-rose-500 font-bold">{errors.description.message}</p>}
               </div>
 
               <div className="pt-4 flex gap-3">
@@ -155,7 +202,7 @@ export const OccurrencesView = () => {
         </div>
       )}
 
-      {/* Modal Fixo de Detalhes da Ocorrência */}
+      {/* Modal de Detalhes da Ocorrência */}
       {selectedOccurrence && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div 
@@ -164,14 +211,14 @@ export const OccurrencesView = () => {
           ></div>
           
           <Card className="relative w-full max-w-2xl bg-white dark:bg-slate-900 shadow-2xl border-none overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className={`p-8 text-white flex justify-between items-start ${selectedOccurrence.type === 'Aviso' ? 'bg-amber-500' : 'bg-emerald-500'}`}>
+            <div className={`p-8 text-white flex justify-between items-start ${getCategoryColor(selectedOccurrence.category)}`}>
               <div className="flex gap-4">
                 <div className="p-3 bg-white/20 rounded-2xl">
                   <AlertCircle size={32} />
                 </div>
                 <div>
-                  <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80">{selectedOccurrence.type} Acadêmico</span>
-                  <h3 className="text-3xl font-black mt-1 leading-tight">{selectedOccurrence.title}</h3>
+                  <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80">{selectedOccurrence.category} Acadêmica</span>
+                  <h3 className="text-3xl font-black mt-1 leading-tight">{selectedOccurrence.name}</h3>
                 </div>
               </div>
               <button 
@@ -188,14 +235,14 @@ export const OccurrencesView = () => {
                   <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Disciplina Relacionada</p>
                   <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-bold text-lg">
                     <BookOpen size={20} className="text-indigo-500 dark:text-indigo-400" />
-                    {selectedOccurrence.subject}
+                    {selectedOccurrence.subjectName}
                   </div>
                 </div>
                 <div className="space-y-1 text-right">
                   <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Data do Registro</p>
                   <div className="flex items-center gap-2 justify-end text-slate-700 dark:text-slate-200 font-bold text-lg">
                     <Calendar size={20} className="text-indigo-500 dark:text-indigo-400" />
-                    {selectedOccurrence.date}
+                    {new Date(selectedOccurrence.date).toLocaleDateString('pt-BR')}
                   </div>
                 </div>
               </div>
@@ -203,13 +250,18 @@ export const OccurrencesView = () => {
               <div className="space-y-3">
                 <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Detalhamento da Ocorrência</p>
                 <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 leading-relaxed italic">
-                  "Esta é uma descrição detalhada fictícia da ocorrência. O sistema registrou este evento para acompanhamento pedagógico. 
-                  Em sistemas reais, aqui constariam os detalhes inseridos pelo corpo docente ou coordenação sobre o evento de {selectedOccurrence.title} 
-                  ocorrido na data de {selectedOccurrence.date}."
+                  {selectedOccurrence.description || 'Nenhum detalhe adicional foi registrado para esta ocorrência.'}
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end">
+              <div className="pt-4 flex justify-between items-center">
+                <button 
+                  onClick={(e) => handleDelete(e, selectedOccurrence.id)}
+                  disabled={isDeleting === selectedOccurrence.id}
+                  className="flex items-center gap-2 text-rose-500 hover:text-rose-600 font-bold text-sm transition-colors"
+                >
+                  <Trash2 size={18} /> Excluir Registro
+                </button>
                 <Button 
                   onClick={() => setSelectedOccurrence(null)}
                   className="px-8"
@@ -230,19 +282,31 @@ export const OccurrencesView = () => {
           className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-lg transition-all group cursor-pointer border-l-4 border-l-transparent hover:border-l-indigo-500 dark:hover:border-l-indigo-400"
         >
           <div className="flex items-start gap-4">
-            <div className={`p-3 rounded-xl transition-colors ${occ.type === 'Aviso' ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-200 dark:group-hover:bg-amber-900/30' : 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/30'}`}>
+            <div className={`p-3 rounded-xl transition-colors ${getCategoryBadgeStyle(occ.category)}`}>
               <AlertCircle size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-800 dark:text-slate-100">{occ.title}</h4>
-              <p className="text-sm text-slate-500 dark:text-slate-500">Referente a disciplina: <span className="text-indigo-600 dark:text-indigo-400 font-medium">{occ.subject}</span></p>
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-slate-800 dark:text-slate-100">{occ.name}</h4>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-tighter ${getCategoryBadgeStyle(occ.category)}`}>
+                  {occ.category}
+                </span>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-500">Referente a disciplina: <span className="text-indigo-600 dark:text-indigo-400 font-medium">{occ.subjectName}</span></p>
             </div>
           </div>
           <div className="flex items-center gap-6">
             <div className="text-right">
               <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase">Data do Registro</p>
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{occ.date}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{new Date(occ.date).toLocaleDateString('pt-BR')}</p>
             </div>
+            <button 
+              onClick={(e) => handleDelete(e, occ.id)}
+              disabled={isDeleting === occ.id}
+              className="p-2 text-slate-300 hover:text-rose-500 dark:text-slate-700 dark:hover:text-rose-400 transition-colors"
+            >
+              <Trash2 size={20} />
+            </button>
             <ChevronRight className="text-slate-300 dark:text-slate-700 hidden md:block group-hover:translate-x-1 transition-transform" />
           </div>
         </Card>
@@ -253,7 +317,7 @@ export const OccurrencesView = () => {
           </div>
           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-center">Sem ocorrências registradas</h3>
           <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-8 px-4 text-sm font-medium">
-            Aqui aparecerão seus avisos, elogios e observações acadêmicas registradas pelo corpo docente ou coordenação.
+            Aqui aparecerão seus registros de faltas, atrasos, advertências e suspensões.
           </p>
         </Card>
       )}
