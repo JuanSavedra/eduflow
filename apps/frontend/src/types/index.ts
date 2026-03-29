@@ -21,7 +21,6 @@ export interface Subject {
   teacher?: string;
   semester?: string;
   grades: number[];
-  absences: number;
   schedules: Schedule[];
 }
 

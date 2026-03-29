@@ -3,7 +3,7 @@
 Este arquivo serve como guia mestre para o Gemini CLI entender a arquitetura, convenções e o funcionamento do projeto EduFlow.
 
 ## 📌 Visão Geral
-EduFlow é uma aplicação web de gestão acadêmica pessoal. Ela permite que estudantes monitorem suas notas, frequências, disciplinas e ocorrências escolares em um dashboard centralizado.
+EduFlow é uma aplicação web de gestão acadêmica pessoal. Ela permite que estudantes monitorem suas notas, disciplinas e ocorrências escolares em um dashboard centralizado.
 
 ### Tecnologias Principais
 - **Framework**: React 19 (com hooks modernos e Context API).
@@ -16,8 +16,8 @@ EduFlow é uma aplicação web de gestão acadêmica pessoal. Ela permite que es
 ## 🏗️ Arquitetura e Estrutura
 O projeto segue uma estrutura organizada por responsabilidades:
 
-- `src/context/AppContext.tsx`: O "coração" da aplicação. Gerencia o estado global (matérias, notas, faltas, aba ativa) e expõe funções de manipulação de dados (`addSubject`, `updateAbsences`, etc.).
-- `src/views/`: Contém os componentes de "página" que representam as diferentes seções da aplicação (Dashboard, Matérias, Ocorrências, IA).
+- `src/context/AppContext.tsx`: O "coração" da aplicação. Gerencia o estado global (matérias, notas, aba ativa) e expõe funções de manipulação de dados (`addSubject`, etc.).
+- `src/views/`: Contém os componentes de "página" que representam as differentes seções da aplicação (Dashboard, Matérias, Ocorrências, IA).
 - `src/components/layout/`: Estrutura de navegação (Sidebar, Header, MobileNav) e o wrapper principal `MainLayout`.
 - `src/components/ui/`: Componentes atômicos e reutilizáveis (Button, Card).
 - `src/types/index.ts`: Definições globais de interfaces e tipos.

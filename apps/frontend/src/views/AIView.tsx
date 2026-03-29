@@ -8,7 +8,6 @@ export const AIView = () => {
 
   // Lógica simples de análise para simular IA
   const needsImprovement = subjects.filter(s => parseFloat(calculateAverage(s.grades)) < 7);
-  const criticalAbsences = subjects.filter(s => s.absences > 6);
 
   return (
     <div className="space-y-6 animate-in zoom-in-95 duration-500">
@@ -29,7 +28,7 @@ export const AIView = () => {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <Card className="p-6">
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
             <span className="p-1 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 rounded">⚠️</span> Foco Acadêmico Necessário
@@ -48,24 +47,6 @@ export const AIView = () => {
               </div>
             )) : (
               <p className="text-slate-500 dark:text-slate-500 italic text-sm">Excelente! Todas as suas médias estão acima de 7.0.</p>
-            )}
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-            <span className="p-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded">🕒</span> Alerta de Presença
-          </h3>
-          <div className="space-y-4">
-            {criticalAbsences.length > 0 ? criticalAbsences.map(sub => (
-              <div key={sub.id} className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                <p className="font-bold text-amber-800 dark:text-amber-400">{sub.name}</p>
-                <p className="text-sm text-amber-700 dark:text-amber-300/80 mt-1 leading-relaxed">
-                  Você já possui {sub.absences}h de faltas. Cuidado para não exceder o limite de 25% do curso.
-                </p>
-              </div>
-            )) : (
-              <p className="text-slate-500 dark:text-slate-500 italic text-sm">Sua frequência está ótima em todas as matérias.</p>
             )}
           </div>
         </Card>

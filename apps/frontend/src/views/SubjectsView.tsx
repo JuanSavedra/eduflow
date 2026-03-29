@@ -31,7 +31,7 @@ interface ResourceFormInputs {
 export const SubjectsView = () => {
   const { 
     subjects, removeSubject, 
-    updateAbsences, calculateAverage,
+    calculateAverage,
     addSubject, addGrade, updateSubjectSchedules
   } = useAppContext();
   const { resources, addResource, toggleFavorite, removeResource } = useResources();
@@ -146,14 +146,6 @@ export const SubjectsView = () => {
   const openResourceModal = (id: string) => {
     setSelectedSubjectId(id);
     setIsResourceModalOpen(true);
-  };
-
-  const handleUpdateAbsences = async (id: string, delta: number) => {
-    try {
-      await updateAbsences(id, delta);
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const handleRemoveSubject = async (id: string) => {
@@ -584,15 +576,7 @@ export const SubjectsView = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 font-bold uppercase">Faltas</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <button onClick={() => handleUpdateAbsences(sub.id, -1)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-600 dark:text-slate-400">-</button>
-                    <span className="text-lg font-bold text-slate-700 dark:text-slate-200">{sub.absences}h</span>
-                    <button onClick={() => handleUpdateAbsences(sub.id, 1)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-600 dark:text-slate-400">+</button>
-                  </div>
-                </div>
+              <div className="flex justify-center items-center pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="text-right">
                   <p className="text-xs text-slate-500 dark:text-slate-500 font-bold uppercase">Média</p>
                   <p className={`text-2xl font-black ${parseFloat(calculateAverage(sub.grades)) < 7 ? 'text-rose-500' : 'text-emerald-500'}`}>

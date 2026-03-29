@@ -32,7 +32,7 @@ export class SubjectsService {
     return results[0];
   }
 
-  async update(userId: string, id: string, data: Partial<{ name: string; teacher: string; semester: string; grades: number[]; absences: number; schedules: any[] }>) {
+  async update(userId: string, id: string, data: Partial<{ name: string; teacher: string; semester: string; grades: number[]; schedules: any[] }>) {
     const results = await this.db
       .update(schema.subjects)
       .set({

@@ -17,7 +17,6 @@ export const subjects = pgTable('subjects', {
   teacher: text('teacher'),
   semester: text('semester'),
   grades: real('grades').array().notNull().default([]),
-  absences: integer('absences').notNull().default(0),
   schedules: jsonb('schedules').notNull().default([]),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

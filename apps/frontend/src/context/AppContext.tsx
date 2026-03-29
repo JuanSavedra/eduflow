@@ -11,7 +11,6 @@ interface AppContextData {
   globalAverage: string | number;
   addSubject: (data: { name: string; teacher?: string; semester?: string }) => Promise<void>;
   removeSubject: (id: string) => Promise<void>;
-  updateAbsences: (id: string, delta: number) => Promise<void>;
   addGrade: (id: string, grade: number) => Promise<void>;
   updateSubjectSchedules: (id: string, schedules: Schedule[]) => Promise<void>;
   addOccurrence: (data: Omit<Occurrence, 'id'>) => Promise<void>;
@@ -107,21 +106,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateAbsences = async (id: string, delta: number) => {
-    const subject = subjects.find(s => s.id === id);
-    if (!subject) return;
-    
-    const newAbsences = Math.max(0, subject.absences + delta);
-    
-    try {
-      const response = await api.patch(`/subjects/${id}`, { absences: newAbsences });
-      setSubjects(prev => prev.map(s => s.id === id ? response.data : s));
-    } catch (error) {
-      console.error("Erro ao atualizar faltas:", error);
-      throw error;
-    }
-  };
-
   const addGrade = async (id: string, grade: number) => {
     const subject = subjects.find(s => s.id === id);
     if (!subject) return;
@@ -171,7 +155,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     <AppContext.Provider value={{
       subjects, occurrences,
       calculateAverage, globalAverage,
-      addSubject, removeSubject, updateAbsences, addGrade,
+      addSubject, removeSubject, addGrade,
       updateSubjectSchedules,
       addOccurrence, removeOccurrence,
       isDarkMode, toggleDarkMode, refreshSubjects, refreshOccurrences
