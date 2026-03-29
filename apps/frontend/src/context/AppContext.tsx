@@ -9,7 +9,6 @@ interface AppContextData {
   occurrences: Occurrence[];
   calculateAverage: (grades: number[]) => string;
   globalAverage: string | number;
-  totalAbsences: number;
   addSubject: (data: { name: string; teacher?: string; semester?: string }) => Promise<void>;
   removeSubject: (id: string) => Promise<void>;
   updateAbsences: (id: string, delta: number) => Promise<void>;
@@ -87,8 +86,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const total = subjects.reduce((acc, sub) => acc + parseFloat(calculateAverage(sub.grades)), 0);
     return subjects.length > 0 ? (total / subjects.length).toFixed(1) : 0;
   }, [subjects]);
-
-  const totalAbsences = subjects.reduce((acc, sub) => acc + sub.absences, 0);
 
   const addSubject = async (data: { name: string; teacher?: string; semester?: string }) => {
     try {
@@ -173,7 +170,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AppContext.Provider value={{
       subjects, occurrences,
-      calculateAverage, globalAverage, totalAbsences,
+      calculateAverage, globalAverage,
       addSubject, removeSubject, updateAbsences, addGrade,
       updateSubjectSchedules,
       addOccurrence, removeOccurrence,

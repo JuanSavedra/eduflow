@@ -12,7 +12,7 @@ import { useAssignments } from '../context/AssignmentsContext';
 type FilterType = 'monthYear' | 'period';
 
 export const DashboardView = () => {
-  const { globalAverage, totalAbsences, subjects, occurrences, calculateAverage, isDarkMode } = useAppContext();
+  const { globalAverage, subjects, occurrences, calculateAverage, isDarkMode } = useAppContext();
   const { assignments } = useAssignments();
 
   // Next Class Logic
@@ -182,7 +182,7 @@ export const DashboardView = () => {
       )}
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6 border-l-4 border-indigo-500 hover:shadow-md transition-all">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
@@ -191,17 +191,6 @@ export const DashboardView = () => {
             <div>
               <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Média Global</p>
               <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{globalAverage}</h3>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-6 border-l-4 border-amber-500 hover:shadow-md transition-all">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-600 dark:text-amber-400">
-              <Clock size={24} />
-            </div>
-            <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Faltas Totais</p>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{totalAbsences}h</h3>
             </div>
           </div>
         </Card>
