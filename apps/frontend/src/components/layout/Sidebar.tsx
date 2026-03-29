@@ -1,8 +1,10 @@
-import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit, ListTodo, Calendar } from 'lucide-react';
+import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit, ListTodo, Calendar, Link as LinkIcon, Star } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useResources } from '../../context/ResourcesContext';
 
 export const Sidebar = () => {
   const location = useLocation();
+  const { resources } = useResources();
 
   const isActive = (path: string) => {
     return location.pathname.includes(path);
@@ -62,6 +64,29 @@ export const Sidebar = () => {
             <span className="font-semibold text-sm">Auxiliar de IA</span>
           </Link>
         </div>
+
+        {resources.filter(r => r.isFavorite).length > 0 && (
+          <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+            <h4 className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest px-4 mb-2 flex items-center gap-1.5">
+              <Star size={10} className="fill-current" /> Favoritos
+            </h4>
+            <div className="space-y-1">
+              {resources.filter(r => r.isFavorite).slice(0, 5).map(resource => (
+                <a 
+                  key={resource.id}
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors group"
+                  title={`${resource.title} (${resource.subjectName})`}
+                >
+                  <LinkIcon size={16} className="opacity-50 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                  <span className="text-sm font-medium truncate">{resource.title}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
     </aside>
   );

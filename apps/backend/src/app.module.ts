@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { OccurrencesModule } from './occurrences/occurrences.module';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { ResourcesModule } from './resources/resources.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AssignmentsModule } from './assignments/assignments.module';
     SubjectsModule,
     OccurrencesModule,
     AssignmentsModule,
+    ResourcesModule,
   ],
   controllers: [],
   providers: [],

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, Trash2, X, BookOpen, GraduationCap, Clock, Save, Loader2, Calendar } from 'lucide-react';
+import { Plus, Trash2, X, BookOpen, GraduationCap, Clock, Save, Loader2, Calendar, Link as LinkIcon, Star, ExternalLink } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
+import { useResources } from '../context/ResourcesContext';
 
 interface SubjectFormInputs {
   name: string;
@@ -22,22 +23,30 @@ interface ScheduleFormInputs {
   room: string;
 }
 
+interface ResourceFormInputs {
+  title: string;
+  url: string;
+}
+
 export const SubjectsView = () => {
   const { 
     subjects, removeSubject, 
     updateAbsences, calculateAverage,
     addSubject, addGrade, updateSubjectSchedules
   } = useAppContext();
+  const { resources, addResource, toggleFavorite, removeResource } = useResources();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<SubjectFormInputs>();
   const gradeForm = useForm<GradeFormInputs>();
   const scheduleForm = useForm<ScheduleFormInputs>();
+  const resourceForm = useForm<ResourceFormInputs>();
 
   const onSubmitSubject = async (data: SubjectFormInputs) => {
     try {
@@ -106,6 +115,24 @@ export const SubjectsView = () => {
     }
   };
 
+  const onSubmitResource = async (data: ResourceFormInputs) => {
+    if (!selectedSubjectId) return;
+    try {
+      setIsSubmitting(true);
+      await addResource({
+        subjectId: selectedSubjectId,
+        title: data.title,
+        url: data.url
+      });
+      resourceForm.reset();
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao salvar recurso.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const openGradeModal = (id: string) => {
     setSelectedSubjectId(id);
     setIsGradeModalOpen(true);
@@ -114,6 +141,11 @@ export const SubjectsView = () => {
   const openScheduleModal = (id: string) => {
     setSelectedSubjectId(id);
     setIsScheduleModalOpen(true);
+  };
+
+  const openResourceModal = (id: string) => {
+    setSelectedSubjectId(id);
+    setIsResourceModalOpen(true);
   };
 
   const handleUpdateAbsences = async (id: string, delta: number) => {
@@ -386,6 +418,92 @@ export const SubjectsView = () => {
         </div>
       )}
 
+      {/* Modal Fixo de Recursos/Links */}
+      {isResourceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            onClick={() => !isSubmitting && setIsResourceModalOpen(false)}
+          ></div>
+          
+          <Card className="relative w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-none overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-cyan-600 p-5 text-white flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <LinkIcon size={20} />
+                <h3 className="font-bold">Recursos e Links</h3>
+              </div>
+              <button onClick={() => !isSubmitting && setIsResourceModalOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Lista de recursos */}
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                {resources.filter(r => r.subjectId === selectedSubjectId).map(resource => (
+                  <div key={resource.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-cyan-200 dark:hover:border-cyan-800 transition-colors">
+                    <div className="flex-1 min-w-0 pr-3">
+                      <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 truncate transition-colors">
+                        {resource.title}
+                        <ExternalLink size={12} className="opacity-50 flex-shrink-0" />
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={() => toggleFavorite(resource.id, !resource.isFavorite)} 
+                        className={`p-1.5 rounded-md transition-colors ${resource.isFavorite ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-slate-300 dark:text-slate-600 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'}`}
+                      >
+                        <Star size={16} className={resource.isFavorite ? 'fill-current' : ''} />
+                      </button>
+                      <button onClick={() => removeResource(resource.id)} className="text-rose-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-1.5 rounded-md transition-colors">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {resources.filter(r => r.subjectId === selectedSubjectId).length === 0 && (
+                  <p className="text-sm text-slate-500 italic text-center py-4">Nenhum recurso salvo. Adicione links importantes abaixo.</p>
+                )}
+              </div>
+
+              {/* Form para adicionar novo */}
+              <form onSubmit={resourceForm.handleSubmit(onSubmitResource)} className="space-y-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                <div>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Título</label>
+                  <input 
+                    type="text"
+                    {...resourceForm.register("title", { required: true })}
+                    disabled={isSubmitting}
+                    placeholder="Ex: Google Drive da Turma, Livro Base"
+                    className="w-full p-3 border rounded-xl focus:ring-4 focus:ring-cyan-500/10 outline-none transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">URL / Link</label>
+                  <input 
+                    type="url"
+                    {...resourceForm.register("url", { required: true })}
+                    disabled={isSubmitting}
+                    placeholder="https://"
+                    className="w-full p-3 border rounded-xl focus:ring-4 focus:ring-cyan-500/10 outline-none transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setIsResourceModalOpen(false)} disabled={isSubmitting} className="flex-1">
+                    Fechar
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting} className="flex-1 bg-cyan-600 hover:bg-cyan-700 border-none text-white shadow-lg shadow-cyan-500/30">
+                    {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} Adicionar
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {subjects.length > 0 ? subjects.map(sub => (
           <Card key={sub.id} className="p-6 hover:shadow-md transition-all">
@@ -420,6 +538,32 @@ export const SubjectsView = () => {
                       </span>
                     )
                   }) : <span className="text-xs text-slate-400 dark:text-slate-600 italic">Sem horários</span>}
+                </div>
+
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">Recursos</span>
+                  <button 
+                    onClick={() => openResourceModal(sub.id)} 
+                    className="text-xs bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 px-2 py-1 rounded-md font-bold hover:bg-cyan-100 dark:hover:bg-cyan-900/50 transition-colors"
+                  >
+                    Gerenciar
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1 mb-4">
+                  {resources.filter(r => r.subjectId === sub.id).length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {resources.filter(r => r.subjectId === sub.id).slice(0, 3).map(r => (
+                        <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 max-w-full text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-2 py-1 rounded-md hover:border-cyan-200 dark:hover:border-cyan-800 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+                          <LinkIcon size={10} className="flex-shrink-0" />
+                          <span className="truncate">{r.title}</span>
+                          {r.isFavorite && <Star size={10} className="text-amber-500 fill-amber-500 flex-shrink-0" />}
+                        </a>
+                      ))}
+                      {resources.filter(r => r.subjectId === sub.id).length > 3 && (
+                        <span className="text-xs text-slate-400 font-medium px-1 py-1">+{resources.filter(r => r.subjectId === sub.id).length - 3} mais</span>
+                      )}
+                    </div>
+                  ) : <span className="text-xs text-slate-400 dark:text-slate-600 italic">Nenhum recurso</span>}
                 </div>
 
                 <div className="flex justify-between items-center mb-2">

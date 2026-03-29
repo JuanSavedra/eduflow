@@ -3,6 +3,7 @@ import './index.css';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AssignmentsProvider } from './context/AssignmentsContext';
+import { ResourcesProvider } from './context/ResourcesContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { DashboardView } from './views/DashboardView';
 import { SubjectsView } from './views/SubjectsView';
@@ -86,7 +87,9 @@ const App = () => {
     <AuthProvider>
       <AppProvider>
         <AssignmentsProvider>
-          <AppRoutes />
+          <ResourcesProvider>
+            <AppRoutes />
+          </ResourcesProvider>
         </AssignmentsProvider>
       </AppProvider>
     </AuthProvider>

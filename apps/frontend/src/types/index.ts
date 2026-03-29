@@ -5,6 +5,16 @@ export interface Schedule {
   room: string;
 }
 
+export interface Resource {
+  id: string;
+  subjectId: string;
+  subjectName?: string;
+  title: string;
+  url: string;
+  isFavorite: boolean;
+  createdAt: string;
+}
+
 export interface Subject {
   id: string;
   name: string;

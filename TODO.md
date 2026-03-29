@@ -17,9 +17,9 @@ Este arquivo detalha as novas funcionalidades que serão implementadas para tran
 
 ## 3. Repositório de Materiais e Links 🔗
 *Objetivo: Centralizar referências de estudo em um só lugar.*
-- [ ] Adicionar seção de "Recursos" dentro do detalhe da Matéria.
-- [ ] Suporte para links externos (Google Drive, YouTube, GitHub).
-- [ ] Acesso rápido aos materiais mais usados pelo Header ou Sidebar.
+- [x] Adicionar seção de "Recursos" dentro do detalhe da Matéria.
+- [x] Suporte para links externos (Google Drive, YouTube, GitHub).
+- [x] Acesso rápido aos materiais mais usados pelo Header ou Sidebar.
 
 ---
-*Status: Fase de Planejamento. Próxima etapa: 1. Gestão de Tarefas.*
+*Status: Roadmap concluído! 🎉*
