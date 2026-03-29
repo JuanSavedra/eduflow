@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useMemo, useEffect, useCallback, type ReactNode } from 'react';
-import type { Subject, Occurrence, Schedule } from '../types';
+import type { Subject, Occurrence, Schedule } from '../types/index';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
 

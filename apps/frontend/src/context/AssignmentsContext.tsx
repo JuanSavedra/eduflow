@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { Assignment } from '../types';
+import type { Assignment } from '../types/index';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
 

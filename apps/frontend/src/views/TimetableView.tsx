@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { Card } from '../components/ui/Card';
-import { Schedule } from '../types';
+import type { Schedule } from '../types/index';
 
 interface ClassSchedule extends Schedule {
   subjectName: string;

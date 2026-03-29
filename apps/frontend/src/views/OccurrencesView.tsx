@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
-import type { Occurrence } from '../types';
+import type { Occurrence } from '../types/index';
 
 interface OccurrenceFormInputs {
   name: string;
