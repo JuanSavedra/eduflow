@@ -15,13 +15,17 @@ export class OccurrencesService {
     return this.db.query.occurrences.findMany({
       where: eq(schema.occurrences.userId, userId),
       with: {
-        subject: true,
+        subject: {
+          columns: {
+            name: true,
+          }
+        },
       },
       orderBy: (occurrences, { desc }) => [desc(occurrences.date)],
     });
   }
 
-  async create(userId: string, data: any) {
+  async create(userId: string, data: { subjectId: string; name: string; description?: string; category: string; date: string }) {
     const [occurrence] = await this.db
       .insert(schema.occurrences)
       .values({
@@ -38,7 +42,11 @@ export class OccurrencesService {
     return this.db.query.occurrences.findFirst({
       where: eq(schema.occurrences.id, occurrence.id),
       with: {
-        subject: true,
+        subject: {
+          columns: {
+            name: true,
+          }
+        },
       },
     });
   }

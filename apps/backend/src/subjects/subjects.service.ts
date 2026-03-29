@@ -4,6 +4,13 @@ import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../database/schema';
 import { eq, and } from 'drizzle-orm';
 
+interface Schedule {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  room: string;
+}
+
 @Injectable()
 export class SubjectsService {
   constructor(
@@ -28,11 +35,11 @@ export class SubjectsService {
         semester: data.semester,
       })
       .returning();
-    
+
     return results[0];
   }
 
-  async update(userId: string, id: string, data: Partial<{ name: string; teacher: string; semester: string; grades: number[]; schedules: any[] }>) {
+  async update(userId: string, id: string, data: Partial<{ name: string; teacher: string; semester: string; grades: number[]; schedules: Schedule[] }>) {
     const results = await this.db
       .update(schema.subjects)
       .set({

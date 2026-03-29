@@ -27,9 +27,14 @@ export const LoginView = () => {
       setError(null);
       await signIn({ email: data.email, password: data.password });
       navigate('/dashboard');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro no login:", err);
-      setError(err.response?.data?.message || 'Ocorreu um erro ao tentar entrar. Tente novamente.');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response: { data: { message: string } } };
+        setError(axiosError.response?.data?.message || 'Ocorreu um erro ao tentar entrar. Tente novamente.');
+      } else {
+        setError('Ocorreu um erro ao tentar entrar. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }

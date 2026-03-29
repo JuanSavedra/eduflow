@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import * as schema from '../database/schema';
 
 @Injectable()
 export class AuthService {
@@ -9,7 +10,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<Omit<typeof schema.users.$inferSelect, 'passwordHash'> | null> {
     const user = await this.usersService.findOneByEmail(email);
     if (user && (await this.usersService.comparePasswords(pass, user.passwordHash))) {
       const { passwordHash, ...result } = user;
@@ -18,7 +19,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: { id: string; email: string; name: string }) {
     const payload = { email: user.email, sub: user.id, name: user.name };
     return {
       access_token: this.jwtService.sign(payload),

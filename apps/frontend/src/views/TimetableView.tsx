@@ -2,6 +2,12 @@ import { useMemo } from 'react';
 import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { Card } from '../components/ui/Card';
+import { Schedule } from '../types';
+
+interface ClassSchedule extends Schedule {
+  subjectName: string;
+  colorClass: string;
+}
 
 export const TimetableView = () => {
   const { subjects } = useAppContext();
@@ -26,8 +32,7 @@ export const TimetableView = () => {
 
   // Organize schedules into a matrix [day][array of classes]
   const scheduleMatrix = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const matrix: Record<number, any[]> = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    const matrix: Record<number, ClassSchedule[]> = { 1: [], 2: [], 3: [], 4: [], 5: [] };
     
     subjects.forEach((subject, subjectIndex) => {
       const colorClass = subjectColors[subjectIndex % subjectColors.length];

@@ -1,54 +1,82 @@
 # EduFlow 🎓
 
-EduFlow é uma aplicação web de gestão acadêmica pessoal, permitindo que estudantes monitorem suas notas, frequências, disciplinas e ocorrências escolares em um dashboard centralizado e moderno.
+EduFlow é o seu centro de comando acadêmico. Uma aplicação web moderna projetada para centralizar tudo o que um estudante precisa: desde o controle de notas até o gerenciamento de prazos, cronograma de aulas e repositório de materiais.
 
-## 🏗️ Estrutura do Projeto (Monorepo)
+## ✨ Funcionalidades Principais
 
-Este é um monorepo que contém as seguintes partes:
+### 📊 Dashboard Inteligente
+*   **Visão Geral**: Acompanhe sua média global e total de ocorrências em tempo real.
+*   **Próximas Entregas**: Um widget dedicado que lista suas tarefas pendentes, priorizando as mais próximas do prazo e destacando as atrasadas com alertas visuais.
+*   **Alerta de Aula**: Receba um aviso no topo do dashboard sobre sua próxima aula do dia, incluindo sala e contagem regressiva.
 
-- **`apps/frontend`**: Aplicação React 19 + Vite 7 + Tailwind CSS v4.
-- **`apps/backend`**: Servidor NestJS + Drizzle ORM + PostgreSQL (Supabase).
-- **`docs/`**: Documentação técnica detalhada das funcionalidades.
+### 📚 Gestão de Disciplinas
+*   Cadastro completo de matérias, professores e semestres.
+*   **Lançamento de Notas**: Controle granular de avaliações com cálculo automático de média.
+*   **Destaque Visual**: Identificação rápida de matérias abaixo da média desejada.
 
-## 🛠️ Tecnologias Principais
+### 📝 Gestão de Tarefas (Assignments)
+*   Organize provas, trabalhos e projetos.
+*   Filtros inteligentes por período ou mês/ano para manter seu histórico organizado.
+*   Status dinâmicos: Pendente, Concluída ou Atrasada.
 
-- **Frontend**: React, TypeScript, Tailwind CSS, Lucide Icons.
-- **Backend**: NestJS, Drizzle ORM, Passport.js (JWT), Bcrypt.
-- **Banco de Dados**: PostgreSQL (hospedado no Supabase).
+### 📅 Cronograma Semanal (Timetable)
+*   Visualize sua grade de horários de forma colorida e organizada.
+*   Mapeamento de salas e horários específicos para cada dia da semana.
+
+### 🔗 Repositório de Materiais
+*   Guarde links importantes (Google Drive, YouTube, GitHub) dentro de cada disciplina.
+*   **Favoritos**: Marque seus materiais mais usados para acesso instantâneo na barra lateral do sistema.
+
+### 🧠 EduAI Advisor (Em Construção 🚧)
+*   O auxiliar de inteligência artificial está sendo desenvolvido para fornecer dicas de estudo personalizadas e planos de ação baseados no seu desempenho real.
+
+## 🏗️ Estrutura do Monorepo
+
+*   **`apps/frontend`**: Interface reativa construída com React 19, Vite 7 e Tailwind CSS v4.
+*   **`apps/backend`**: API robusta com NestJS, utilizando Drizzle ORM para uma comunicação eficiente com o banco de dados.
+*   **`libs/shared`**: Tipagens e utilitários compartilhados entre os ambientes.
+
+## 🛠️ Tecnologias
+
+*   **Linguagem**: TypeScript (em todo o projeto).
+*   **Backend**: NestJS, Drizzle ORM, Passport.js (JWT), PostgreSQL.
+*   **Frontend**: React, Lucide Icons, Recharts (Gráficos), Tailwind CSS v4.
 
 ## 🚀 Como Rodar o Projeto
 
 ### 1. Pré-requisitos
-- Node.js (v18 ou superior)
-- NPM ou Yarn
-- Uma instância do PostgreSQL (Supabase recomendada)
+*   Node.js (v20 ou superior recomendada)
+*   Uma instância do PostgreSQL (recomendamos Supabase pela facilidade)
 
-### 2. Configuração do Backend
-Entre na pasta `apps/backend`:
+### 2. Configuração do Ambiente
+Crie um arquivo `.env` na pasta `apps/backend` seguindo o modelo:
+
+```env
+# URL de conexão com o banco de dados PostgreSQL
+DATABASE_URL="postgres://usuario:senha@host:porta/database"
+
+# Chave secreta para geração dos tokens JWT
+JWT_SECRET="sua_chave_secreta_aqui"
+```
+
+### 3. Execução
+
+**Backend:**
 ```bash
 cd apps/backend
 npm install
-cp .env.example .env
-# Adicione sua DATABASE_URL e JWT_SECRET no .env
-npx drizzle-kit push
+npx drizzle-kit push  # Sincroniza o schema com o banco
 npm run dev
 ```
 
-### 3. Configuração do Frontend
-Entre na pasta `apps/frontend`:
+**Frontend:**
 ```bash
 cd apps/frontend
 npm install
 npm run dev
 ```
 
-## 🔐 Autenticação
-O projeto utiliza **JWT (JSON Web Tokens)** para autenticação segura. A documentação completa do fluxo de login pode ser encontrada em `docs/auth/`.
-
-## 📏 Padrões de Código
-- **Commits**: Mensagens claras em português e organizadas por contexto.
-- **Tipagem**: TypeScript rigoroso em ambos os lados (Frontend e Backend).
-- **Estilização**: Tailwind CSS v4 utilizando a nova sintaxe de tema via CSS.
+Acesse o frontend em `http://localhost:5173`.
 
 ---
-*Este projeto foi desenvolvido com foco em aprendizado de arquitetura fullstack e segurança da informação.*
+*EduFlow - Organização para o seu sucesso acadêmico.*

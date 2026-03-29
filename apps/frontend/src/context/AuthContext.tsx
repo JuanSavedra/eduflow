@@ -8,13 +8,24 @@ interface User {
   email: string;
 }
 
+interface SignInCredentials {
+  email: string;
+  password?: string; // Optional if using different providers, but we use email/password
+}
+
+interface SignUpCredentials {
+  name: string;
+  email: string;
+  password?: string;
+}
+
 interface AuthContextData {
   user: User | null;
   token: string | null;
   signed: boolean;
   loading: boolean;
-  signIn(credentials: any): Promise<void>;
-  signUp(credentials: any): Promise<void>;
+  signIn(credentials: SignInCredentials): Promise<void>;
+  signUp(credentials: SignUpCredentials): Promise<void>;
   signOut(): void;
   updateProfile(data: Partial<User>): Promise<void>;
 }
@@ -26,24 +37,31 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const storagedUser = localStorage.getItem('@EduFlow:user');
+    if (storagedUser) {
+      try {
+        return JSON.parse(storagedUser);
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+        return null;
+      }
+    }
+    return null;
+  });
+  
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('@EduFlow:token');
+  });
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Ao carregar o app, verifica se há sessão salva no localStorage
-    const storagedUser = localStorage.getItem('@EduFlow:user');
-    const storagedToken = localStorage.getItem('@EduFlow:token');
-
-    if (storagedUser && storagedToken) {
-      setUser(JSON.parse(storagedUser));
-      setToken(storagedToken);
-    }
-    
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(false);
   }, []);
 
-  async function signIn({ email, password }: any) {
+  async function signIn({ email, password }: SignInCredentials) {
     const response = await api.post('/auth/login', { email, password });
     
     const { access_token, user: userData } = response.data;
@@ -55,7 +73,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem('@EduFlow:token', access_token);
   }
 
-  async function signUp({ name, email, password }: any) {
+  async function signUp({ name, email, password }: SignUpCredentials) {
     const response = await api.post('/auth/register', { name, email, password });
     
     const { access_token, user: userData } = response.data;

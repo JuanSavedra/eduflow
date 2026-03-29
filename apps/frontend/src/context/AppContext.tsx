@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useMemo, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import type { Subject, Occurrence, Schedule } from '../types';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
@@ -45,7 +45,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
 
-  const refreshSubjects = async () => {
+  const refreshSubjects = useCallback(async () => {
     if (!signed) return;
     try {
       const response = await api.get('/subjects');
@@ -53,9 +53,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Erro ao carregar matérias:", error);
     }
-  };
+  }, [signed]);
 
-  const refreshOccurrences = async () => {
+  const refreshOccurrences = useCallback(async () => {
     if (!signed) return;
     try {
       const response = await api.get('/occurrences');
@@ -63,17 +63,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Erro ao carregar ocorrências:", error);
     }
-  };
+  }, [signed]);
 
   useEffect(() => {
     if (signed) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       refreshSubjects();
       refreshOccurrences();
     } else {
       setSubjects([]);
       setOccurrences([]);
     }
-  }, [signed]);
+  }, [signed, refreshSubjects, refreshOccurrences]);
 
   const calculateAverage = (grades: number[]) => {
     if (!grades || grades.length === 0) return "0.0";

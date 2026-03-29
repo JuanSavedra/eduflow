@@ -34,9 +34,14 @@ export const RegisterView = () => {
         password: data.password 
       });
       navigate('/dashboard');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro no registro:", err);
-      setError(err.response?.data?.message || 'Ocorreu um erro ao criar sua conta. Tente novamente.');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response: { data: { message: string } } };
+        setError(axiosError.response?.data?.message || 'Ocorreu um erro ao criar sua conta. Tente novamente.');
+      } else {
+        setError('Ocorreu um erro ao criar sua conta. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }

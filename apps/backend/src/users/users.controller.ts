@@ -1,6 +1,7 @@
 import { Controller, Patch, Body, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthenticatedRequest } from '../auth/interfaces/authenticated-request.interface';
 
 @Controller('users')
 export class UsersController {
@@ -8,7 +9,7 @@ export class UsersController {
 
   @Patch('profile')
   @UseGuards(AuthGuard('jwt'))
-  async updateProfile(@Req() req: any, @Body() body: any) {
+  async updateProfile(@Req() req: AuthenticatedRequest, @Body() body: { name?: string }) {
     if (!req.user || !req.user.userId) {
       throw new UnauthorizedException('Sessão inválida.');
     }
