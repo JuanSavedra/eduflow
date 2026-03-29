@@ -1,3 +1,10 @@
+export interface Schedule {
+  dayOfWeek: number; // 0 for Sunday, 1 for Monday, etc.
+  startTime: string; // 'HH:MM'
+  endTime: string; // 'HH:MM'
+  room: string;
+}
+
 export interface Subject {
   id: string;
   name: string;
@@ -5,6 +12,7 @@ export interface Subject {
   semester?: string;
   grades: number[];
   absences: number;
+  schedules: Schedule[];
 }
 
 export interface Occurrence {

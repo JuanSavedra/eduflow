@@ -8,6 +8,7 @@ import { DashboardView } from './views/DashboardView';
 import { SubjectsView } from './views/SubjectsView';
 import { OccurrencesView } from './views/OccurrencesView';
 import { AssignmentsView } from './views/AssignmentsView';
+import { TimetableView } from './views/TimetableView';
 import { AIView } from './views/AIView';
 import { LoginView } from './views/LoginView';
 import { RegisterView } from './views/RegisterView';
@@ -67,6 +68,7 @@ const AppRoutes = () => {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardView />} />
         <Route path="subjects" element={<SubjectsView />} />
+        <Route path="timetable" element={<TimetableView />} />
         <Route path="occurrences" element={<OccurrencesView />} />
         <Route path="assignments" element={<AssignmentsView />} />
         <Route path="ai" element={<AIView />} />

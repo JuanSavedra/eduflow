@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, X, BookOpen, GraduationCap, Clock, Save, Loader2 } from 'lucide-react';
+import { Plus, Trash2, X, BookOpen, GraduationCap, Clock, Save, Loader2, Calendar } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -15,20 +15,29 @@ interface GradeFormInputs {
   grade: number;
 }
 
+interface ScheduleFormInputs {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  room: string;
+}
+
 export const SubjectsView = () => {
   const { 
     subjects, removeSubject, 
     updateAbsences, calculateAverage,
-    addSubject, addGrade
+    addSubject, addGrade, updateSubjectSchedules
   } = useAppContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<SubjectFormInputs>();
   const gradeForm = useForm<GradeFormInputs>();
+  const scheduleForm = useForm<ScheduleFormInputs>();
 
   const onSubmitSubject = async (data: SubjectFormInputs) => {
     try {
@@ -61,9 +70,50 @@ export const SubjectsView = () => {
     }
   };
 
+  const onSubmitSchedule = async (data: ScheduleFormInputs) => {
+    if (!selectedSubjectId) return;
+    try {
+      setIsSubmitting(true);
+      const subject = subjects.find(s => s.id === selectedSubjectId);
+      if (subject) {
+        const newSchedule = {
+          dayOfWeek: Number(data.dayOfWeek),
+          startTime: data.startTime,
+          endTime: data.endTime,
+          room: data.room || 'TBD',
+        };
+        const updatedSchedules = [...(subject.schedules || []), newSchedule];
+        await updateSubjectSchedules(selectedSubjectId, updatedSchedules);
+        scheduleForm.reset();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao salvar horário.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRemoveSchedule = async (subjectId: string, indexToRemove: number) => {
+    try {
+      const subject = subjects.find(s => s.id === subjectId);
+      if (subject && subject.schedules) {
+        const updatedSchedules = subject.schedules.filter((_, idx) => idx !== indexToRemove);
+        await updateSubjectSchedules(subjectId, updatedSchedules);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const openGradeModal = (id: string) => {
     setSelectedSubjectId(id);
     setIsGradeModalOpen(true);
+  };
+
+  const openScheduleModal = (id: string) => {
+    setSelectedSubjectId(id);
+    setIsScheduleModalOpen(true);
   };
 
   const handleUpdateAbsences = async (id: string, delta: number) => {
@@ -230,6 +280,112 @@ export const SubjectsView = () => {
         </div>
       )}
 
+      {/* Modal Fixo de Adicionar Horário */}
+      {isScheduleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            onClick={() => !isSubmitting && setIsScheduleModalOpen(false)}
+          ></div>
+          
+          <Card className="relative w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-none overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-amber-500 p-5 text-white flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Calendar size={20} />
+                <h3 className="font-bold">Gerenciar Horários</h3>
+              </div>
+              <button onClick={() => !isSubmitting && setIsScheduleModalOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Lista de horários existentes */}
+              <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                {selectedSubjectId && subjects.find(s => s.id === selectedSubjectId)?.schedules?.map((schedule, idx) => {
+                  const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                  return (
+                    <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                      <div>
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{days[schedule.dayOfWeek]}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{schedule.startTime} - {schedule.endTime} | Sala: {schedule.room}</p>
+                      </div>
+                      <button onClick={() => handleRemoveSchedule(selectedSubjectId, idx)} className="text-rose-500 hover:text-rose-600 p-2">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  );
+                })}
+                {selectedSubjectId && (!subjects.find(s => s.id === selectedSubjectId)?.schedules || subjects.find(s => s.id === selectedSubjectId)?.schedules?.length === 0) && (
+                  <p className="text-sm text-slate-500 italic text-center py-2">Nenhum horário cadastrado.</p>
+                )}
+              </div>
+
+              {/* Form para adicionar novo */}
+              <form onSubmit={scheduleForm.handleSubmit(onSubmitSchedule)} className="space-y-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                <div>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Dia da Semana</label>
+                  <select 
+                    {...scheduleForm.register("dayOfWeek", { required: true })}
+                    disabled={isSubmitting}
+                    className="w-full p-3 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    <option value="1">Segunda-feira</option>
+                    <option value="2">Terça-feira</option>
+                    <option value="3">Quarta-feira</option>
+                    <option value="4">Quinta-feira</option>
+                    <option value="5">Sexta-feira</option>
+                    <option value="6">Sábado</option>
+                    <option value="0">Domingo</option>
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Início</label>
+                    <input 
+                      type="time"
+                      {...scheduleForm.register("startTime", { required: true })}
+                      disabled={isSubmitting}
+                      className="w-full p-3 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Término</label>
+                    <input 
+                      type="time"
+                      {...scheduleForm.register("endTime", { required: true })}
+                      disabled={isSubmitting}
+                      className="w-full p-3 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sala (opcional)</label>
+                  <input 
+                    type="text"
+                    {...scheduleForm.register("room")}
+                    disabled={isSubmitting}
+                    placeholder="Ex: Lab 3, A102"
+                    className="w-full p-3 border rounded-xl focus:ring-4 focus:ring-amber-500/10 outline-none transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setIsScheduleModalOpen(false)} disabled={isSubmitting} className="flex-1">
+                    Fechar
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting} className="flex-1 bg-amber-500 hover:bg-amber-600 border-none text-white shadow-lg shadow-amber-500/30">
+                    {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} Adicionar
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {subjects.length > 0 ? subjects.map(sub => (
           <Card key={sub.id} className="p-6 hover:shadow-md transition-all">
@@ -245,6 +401,27 @@ export const SubjectsView = () => {
 
             <div className="space-y-4">
               <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">Horários</span>
+                  <button 
+                    onClick={() => openScheduleModal(sub.id)} 
+                    className="text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-md font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+                  >
+                    Gerenciar
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1 mb-4">
+                  {sub.schedules && sub.schedules.length > 0 ? sub.schedules.map((s, idx) => {
+                    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                    return (
+                      <span key={idx} className="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5">
+                        <Calendar size={12} className="text-amber-500" />
+                        {days[s.dayOfWeek]} {s.startTime}-{s.endTime} ({s.room})
+                      </span>
+                    )
+                  }) : <span className="text-xs text-slate-400 dark:text-slate-600 italic">Sem horários</span>}
+                </div>
+
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">Notas</span>
                   <button 

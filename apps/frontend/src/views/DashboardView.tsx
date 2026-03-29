@@ -15,6 +15,44 @@ export const DashboardView = () => {
   const { globalAverage, totalAbsences, subjects, occurrences, calculateAverage, isDarkMode } = useAppContext();
   const { assignments } = useAssignments();
 
+  // Next Class Logic
+  const nextClass = useMemo(() => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentMinutesTotal = currentHour * 60 + currentMinute;
+
+    let upcomingClass = null;
+    let minMinutesDiff = Infinity;
+
+    subjects.forEach(subject => {
+      if (subject.schedules) {
+        subject.schedules.forEach(schedule => {
+          if (schedule.dayOfWeek === currentDay) {
+            const [startH, startM] = schedule.startTime.split(':').map(Number);
+            const startMinutesTotal = startH * 60 + startM;
+            
+            const diff = startMinutesTotal - currentMinutesTotal;
+            
+            // If class is today and hasn't started yet (or started within the last 15 mins but mostly we care about upcoming)
+            if (diff > -15 && diff < minMinutesDiff) {
+              minMinutesDiff = diff;
+              upcomingClass = {
+                subjectName: subject.name,
+                room: schedule.room,
+                startTime: schedule.startTime,
+                diff,
+              };
+            }
+          }
+        });
+      }
+    });
+
+    return upcomingClass as { subjectName: string; room: string; startTime: string; diff: number } | null;
+  }, [subjects]);
+
   // Estados para os filtros
   const [filterType, setFilterType] = useState<FilterType>('monthYear');
   const [startDate, setStartDate] = useState('');
@@ -121,6 +159,28 @@ export const DashboardView = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+      
+      {nextClass && (
+        <div className="bg-gradient-to-r from-indigo-500 to-violet-600 rounded-xl p-4 text-white shadow-lg flex items-center justify-between animate-in slide-in-from-top-4">
+          <div className="flex items-center gap-4">
+            <div className="bg-white/20 p-2.5 rounded-lg backdrop-blur-sm">
+              <Clock size={24} className="text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-indigo-100 font-medium">Sua próxima aula hoje</p>
+              <h3 className="text-lg font-bold">
+                {nextClass.subjectName} {nextClass.room ? `• Sala ${nextClass.room}` : ''}
+              </h3>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-black">
+              {nextClass.diff <= 0 ? 'Agora!' : nextClass.diff < 60 ? `em ${nextClass.diff} min` : `às ${nextClass.startTime}`}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6 border-l-4 border-indigo-500 hover:shadow-md transition-all">

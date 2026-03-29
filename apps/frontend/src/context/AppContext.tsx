@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useMemo, useEffect, type ReactNode } from 'react';
-import type { Subject, Occurrence } from '../types';
+import type { Subject, Occurrence, Schedule } from '../types';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
 
@@ -14,6 +14,7 @@ interface AppContextData {
   removeSubject: (id: string) => Promise<void>;
   updateAbsences: (id: string, delta: number) => Promise<void>;
   addGrade: (id: string, grade: number) => Promise<void>;
+  updateSubjectSchedules: (id: string, schedules: Schedule[]) => Promise<void>;
   addOccurrence: (data: Omit<Occurrence, 'id'>) => Promise<void>;
   removeOccurrence: (id: string) => Promise<void>;
   isDarkMode: boolean;
@@ -139,6 +140,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateSubjectSchedules = async (id: string, schedules: Schedule[]) => {
+    try {
+      const response = await api.patch(`/subjects/${id}`, { schedules });
+      setSubjects(prev => prev.map(s => s.id === id ? response.data : s));
+    } catch (error) {
+      console.error("Erro ao atualizar horários:", error);
+      throw error;
+    }
+  };
+
   const addOccurrence = async (data: Omit<Occurrence, 'id'>) => {
     try {
       const response = await api.post('/occurrences', data);
@@ -164,6 +175,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       subjects, occurrences,
       calculateAverage, globalAverage, totalAbsences,
       addSubject, removeSubject, updateAbsences, addGrade,
+      updateSubjectSchedules,
       addOccurrence, removeOccurrence,
       isDarkMode, toggleDarkMode, refreshSubjects, refreshOccurrences
     }}>

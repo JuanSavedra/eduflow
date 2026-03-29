@@ -1,4 +1,4 @@
-import { integer, pgTable, real, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { integer, pgTable, real, text, timestamp, uuid, jsonb } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const users = pgTable('users', {
@@ -18,6 +18,7 @@ export const subjects = pgTable('subjects', {
   semester: text('semester'),
   grades: real('grades').array().notNull().default([]),
   absences: integer('absences').notNull().default(0),
+  schedules: jsonb('schedules').notNull().default([]),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

@@ -1,4 +1,4 @@
-import { LayoutDashboard, BookOpen, BrainCircuit, ListTodo } from 'lucide-react';
+import { LayoutDashboard, BookOpen, BrainCircuit, ListTodo, Calendar } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export const MobileNav = () => {
@@ -17,6 +17,10 @@ export const MobileNav = () => {
       <Link to="/subjects" className={`flex flex-col items-center p-2 ${isActive('subjects') ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
         <BookOpen size={20} />
         <span className="text-[10px] font-bold mt-1">Aulas</span>
+      </Link>
+      <Link to="/timetable" className={`flex flex-col items-center p-2 ${isActive('timetable') ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
+        <Calendar size={20} />
+        <span className="text-[10px] font-bold mt-1">Grade</span>
       </Link>
       <Link to="/assignments" className={`flex flex-col items-center p-2 ${isActive('assignments') ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
         <ListTodo size={20} />

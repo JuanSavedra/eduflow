@@ -1,4 +1,4 @@
-import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit, ListTodo } from 'lucide-react';
+import { LayoutDashboard, BookOpen, AlertCircle, BrainCircuit, ListTodo, Calendar } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export const Sidebar = () => {
@@ -31,6 +31,13 @@ export const Sidebar = () => {
         >
           <BookOpen size={20} />
           <span className="font-semibold">Minhas Matérias</span>
+        </Link>
+        <Link 
+          to="/timetable"
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive('timetable') ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+        >
+          <Calendar size={20} />
+          <span className="font-semibold">Cronograma</span>
         </Link>
         <Link 
           to="/assignments"
