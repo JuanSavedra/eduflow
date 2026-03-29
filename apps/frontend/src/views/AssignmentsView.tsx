@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
-import { ListTodo, CheckCircle2, Clock, AlertCircle, Plus, Calendar, Trash2 } from 'lucide-react';
+import { ListTodo, CheckCircle2, Clock, AlertCircle, Plus, Calendar, Trash2, Filter, RotateCcw } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAppContext } from '../context/AppContext';
 import { useAssignments } from '../context/AssignmentsContext';
 
+type FilterType = 'monthYear' | 'period';
+
 export const AssignmentsView = () => {
-  const { subjects } = useAppContext();
+  const { subjects, occurrences } = useAppContext();
   const { assignments, addAssignment, updateAssignmentStatus, removeAssignment } = useAssignments();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,6 +18,69 @@ export const AssignmentsView = () => {
     subjectId: '',
     dueDate: '',
   });
+
+  // Estados para os filtros
+  const [filterType, setFilterType] = useState<FilterType>('monthYear');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth().toString());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+
+  const months = [
+    { value: '0', label: 'Janeiro' },
+    { value: '1', label: 'Fevereiro' },
+    { value: '2', label: 'Março' },
+    { value: '3', label: 'Abril' },
+    { value: '4', label: 'Maio' },
+    { value: '5', label: 'Junho' },
+    { value: '6', label: 'Julho' },
+    { value: '7', label: 'Agosto' },
+    { value: '8', label: 'Setembro' },
+    { value: '9', label: 'Outubro' },
+    { value: '10', label: 'Novembro' },
+    { value: '11', label: 'Dezembro' },
+  ];
+
+  const availableYears = useMemo(() => {
+    const years = [...occurrences, ...assignments].map(item => {
+      const dateStr = 'date' in item ? item.date : item.dueDate;
+      return new Date(dateStr).getFullYear().toString();
+    });
+    const currentYear = new Date().getFullYear().toString();
+    const uniqueYears = Array.from(new Set([...years, currentYear])).sort((a, b) => b.localeCompare(a));
+    return uniqueYears;
+  }, [occurrences, assignments]);
+
+  const clearFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setSelectedMonth(new Date().getMonth().toString());
+    setSelectedYear(new Date().getFullYear().toString());
+  };
+
+  const filteredAssignments = useMemo(() => {
+    return assignments.filter(task => {
+      const taskDate = new Date(task.dueDate);
+
+      if (filterType === 'monthYear') {
+        const taskMonth = taskDate.getMonth().toString();
+        const taskYear = taskDate.getFullYear().toString();
+        return taskMonth === selectedMonth && taskYear === selectedYear;
+      } else {
+        if (!startDate && !endDate) return true;
+        
+        const start = startDate ? new Date(startDate) : new Date('2000-01-01');
+        const end = endDate ? new Date(endDate) : new Date('2100-01-01');
+
+        if (endDate && startDate && new Date(endDate) < new Date(startDate)) {
+          return taskDate >= start;
+        }
+        
+        end.setHours(23, 59, 59, 999);
+        return taskDate >= start && taskDate <= end;
+      }
+    });
+  }, [assignments, filterType, startDate, endDate, selectedMonth, selectedYear]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +104,7 @@ export const AssignmentsView = () => {
     const completed: typeof assignments = [];
     const late: typeof assignments = [];
 
-    assignments.forEach(assignment => {
+    filteredAssignments.forEach(assignment => {
       if (assignment.status === 'completed') {
         completed.push(assignment);
       } else {
@@ -53,19 +118,21 @@ export const AssignmentsView = () => {
     });
 
     return { pending, completed, late };
-  }, [assignments, now]);
+  }, [filteredAssignments, now]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  const getDaysRemaining = (dateString: string) => {
+  const getDaysDiff = (dateString: string) => {
     const date = new Date(dateString);
-    const diffTime = date.getTime() - now.getTime();
+    const diffTime = Math.abs(date.getTime() - now.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
+
+  const isInvalidRange = filterType === 'period' && startDate && endDate && new Date(endDate) < new Date(startDate);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
@@ -83,7 +150,100 @@ export const AssignmentsView = () => {
         </Button>
       </div>
 
-      {/* Tabs / Filters could go here */}
+      {/* Filtros */}
+      <Card className="p-4 sm:p-6">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+              <Filter size={20} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+              Filtrar Tarefas
+            </h3>
+          </div>
+          
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex flex-col min-w-[140px]">
+              <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">Tipo de Filtro</label>
+              <select 
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as FilterType)}
+                className="text-sm font-bold p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer"
+              >
+                <option value="monthYear">📅 Mês e Ano</option>
+                <option value="period">🗓️ Período</option>
+              </select>
+            </div>
+
+            {filterType === 'monthYear' ? (
+              <>
+                <div className="flex flex-col min-w-[140px]">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">Mês</label>
+                  <select 
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="text-sm font-bold p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer"
+                  >
+                    {months.map(m => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col min-w-[100px]">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">Ano</label>
+                  <select 
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="text-sm font-bold p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer"
+                  >
+                    {availableYears.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">De</label>
+                  <input 
+                    type="date" 
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="text-sm font-bold p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">Até</label>
+                  <input 
+                    type="date" 
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className={`text-sm font-bold p-2.5 rounded-xl border outline-none focus:ring-4 transition-all ${isInvalidRange ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20 focus:ring-rose-500/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-indigo-500/10 focus:border-indigo-500 text-slate-700 dark:text-slate-200'}`}
+                  />
+                </div>
+              </>
+            )}
+
+            <button 
+              onClick={clearFilters}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-black text-slate-400 hover:text-indigo-500 dark:text-slate-500 dark:hover:text-indigo-400 transition-colors group mb-[2px]"
+              title="Limpar Filtros"
+            >
+              <RotateCcw size={18} className="group-hover:-rotate-45 transition-transform" />
+              LIMPAR
+            </button>
+          </div>
+        </div>
+        {isInvalidRange && (
+          <div className="mt-4 p-3 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl flex items-center gap-3 text-rose-600 dark:text-rose-400 animate-in slide-in-from-top-2">
+            <AlertCircle size={18} />
+            <p className="text-xs font-bold">Atenção: A data final não pode ser menor que a data inicial.</p>
+          </div>
+        )}
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
@@ -94,29 +254,35 @@ export const AssignmentsView = () => {
             <h2 className="font-bold">Atrasadas ({categorizedAssignments.late.length})</h2>
           </div>
           {categorizedAssignments.late.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-500 italic">Nenhuma tarefa atrasada. Excelente!</p>
+            <p className="text-sm text-slate-500 dark:text-slate-500 italic">Nenhuma tarefa atrasada neste período.</p>
           ) : (
-            categorizedAssignments.late.map(task => (
-              <Card key={task.id} className="p-4 border-l-4 border-rose-500 bg-rose-50/30 dark:bg-rose-950/10">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-slate-800 dark:text-slate-100 line-clamp-2">{task.title}</h3>
-                  <button onClick={() => updateAssignmentStatus(task.id, 'completed')} className="text-slate-400 hover:text-emerald-500 transition-colors" title="Marcar como concluída">
-                    <CheckCircle2 size={20} />
-                  </button>
-                </div>
-                {task.subjectName && <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-2">{task.subjectName}</p>}
-                {task.description && <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">{task.description}</p>}
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
-                    <Calendar size={14} />
-                    <span>{formatDate(task.dueDate)}</span>
+            categorizedAssignments.late.map(task => {
+              const diffDays = getDaysDiff(task.dueDate);
+              return (
+                <Card key={task.id} className="p-4 border-l-4 border-rose-500 bg-rose-50/30 dark:bg-rose-950/10 transition-all hover:shadow-md">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 line-clamp-2">{task.title}</h3>
+                    <button onClick={() => updateAssignmentStatus(task.id, 'completed')} className="text-slate-400 hover:text-emerald-500 transition-colors" title="Marcar como concluída">
+                      <CheckCircle2 size={20} />
+                    </button>
                   </div>
-                  <button onClick={() => removeAssignment(task.id)} className="text-slate-400 hover:text-rose-500 transition-colors">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </Card>
-            ))
+                  {task.subjectName && <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-2">{task.subjectName}</p>}
+                  {task.description && <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">{task.description}</p>}
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+                        <Calendar size={14} />
+                        <span>{formatDate(task.dueDate)}</span>
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-rose-500">Atrasado há {diffDays} {diffDays === 1 ? 'dia' : 'dias'}</span>
+                    </div>
+                    <button onClick={() => removeAssignment(task.id)} className="text-slate-400 hover:text-rose-500 transition-colors">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </Card>
+              );
+            })
           )}
         </div>
 
@@ -127,13 +293,15 @@ export const AssignmentsView = () => {
             <h2 className="font-bold">Pendentes ({categorizedAssignments.pending.length})</h2>
           </div>
           {categorizedAssignments.pending.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-500 italic">Nenhuma tarefa pendente.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-500 italic">Nenhuma tarefa pendente neste período.</p>
           ) : (
             categorizedAssignments.pending.map(task => {
-              const daysLeft = getDaysRemaining(task.dueDate);
-              const isUrgent = daysLeft <= 2;
+              const date = new Date(task.dueDate);
+              const diffTime = date.getTime() - now.getTime();
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              const isUrgent = diffDays <= 2;
               return (
-                <Card key={task.id} className={`p-4 border-l-4 ${isUrgent ? 'border-amber-500' : 'border-blue-500'}`}>
+                <Card key={task.id} className={`p-4 border-l-4 transition-all hover:shadow-md ${isUrgent ? 'border-amber-500' : 'border-blue-500'}`}>
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-bold text-slate-800 dark:text-slate-100 line-clamp-2">{task.title}</h3>
                     <button onClick={() => updateAssignmentStatus(task.id, 'completed')} className="text-slate-400 hover:text-emerald-500 transition-colors" title="Marcar como concluída">
@@ -143,9 +311,14 @@ export const AssignmentsView = () => {
                   {task.subjectName && <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-2">{task.subjectName}</p>}
                   {task.description && <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">{task.description}</p>}
                   <div className="flex items-center justify-between mt-4">
-                    <div className={`flex items-center gap-1.5 text-xs font-medium ${isUrgent ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                      <Calendar size={14} />
-                      <span>{formatDate(task.dueDate)}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className={`flex items-center gap-1.5 text-xs font-medium ${isUrgent ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                        <Calendar size={14} />
+                        <span>{formatDate(task.dueDate)}</span>
+                      </div>
+                      <span className={`text-[10px] font-black uppercase ${isUrgent ? 'text-amber-500' : 'text-slate-400'}`}>
+                        {diffDays === 0 ? 'Hoje' : diffDays === 1 ? 'Amanhã' : `Faltam ${diffDays} dias`}
+                      </span>
                     </div>
                     <button onClick={() => removeAssignment(task.id)} className="text-slate-400 hover:text-rose-500 transition-colors">
                       <Trash2 size={16} />
@@ -164,10 +337,10 @@ export const AssignmentsView = () => {
             <h2 className="font-bold">Concluídas ({categorizedAssignments.completed.length})</h2>
           </div>
           {categorizedAssignments.completed.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-500 italic">Nenhuma tarefa concluída ainda.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-500 italic">Nenhuma tarefa concluída neste período.</p>
           ) : (
             categorizedAssignments.completed.map(task => (
-              <Card key={task.id} className="p-4 border-l-4 border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/10 opacity-75">
+              <Card key={task.id} className="p-4 border-l-4 border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/10 opacity-75 transition-all hover:shadow-md">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-slate-800 dark:text-slate-100 line-through decoration-slate-400">{task.title}</h3>
                   <button onClick={() => updateAssignmentStatus(task.id, 'pending')} className="text-emerald-500 hover:text-amber-500 transition-colors" title="Desmarcar">

@@ -158,6 +158,77 @@ export const DashboardView = () => {
         </Card>
       </div>
 
+      {/* Widget Próximas Entregas */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3 tracking-tight">
+            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+              <ListTodo size={22} />
+            </div>
+            Próximas Entregas
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {assignments
+            .filter(a => a.status !== 'completed')
+            .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+            .slice(0, 3)
+            .map(task => {
+              const dueDate = new Date(task.dueDate);
+              const now = new Date();
+              const isLate = dueDate < now;
+              const diffTime = Math.abs(dueDate.getTime() - now.getTime());
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              
+              const isUrgent = !isLate && diffDays <= 2;
+              
+              return (
+                <div key={task.id} className={`p-4 rounded-xl border-2 transition-all ${
+                  isLate 
+                    ? 'border-rose-200 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-950/10' 
+                    : isUrgent 
+                      ? 'border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/10' 
+                      : 'border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20'
+                }`}>
+                  <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-1 line-clamp-1">{task.title}</h4>
+                  <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-3">{task.subjectName}</p>
+                  <div className="flex items-center justify-between">
+                    <div className={`text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider ${
+                      isLate 
+                        ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400' 
+                        : isUrgent 
+                          ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' 
+                          : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    }`}>
+                      {isLate 
+                        ? `Atrasado há ${diffDays} ${diffDays === 1 ? 'dia' : 'dias'}` 
+                        : diffDays === 0 
+                          ? 'Hoje' 
+                          : diffDays === 1 
+                            ? 'Amanhã' 
+                            : `Faltam ${diffDays} dias`}
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      <Calendar size={12} />
+                      {dueDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          {assignments.filter(a => a.status !== 'completed').length === 0 && (
+            <div className="col-span-full py-8 text-center">
+              <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-300 dark:text-slate-700">
+                <ListTodo size={24} />
+              </div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-500 italic">
+                Nenhuma entrega próxima. Você está em dia!
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico de Radar - RPG Stats */}
         <Card className="p-6">
@@ -403,49 +474,6 @@ export const DashboardView = () => {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        </Card>
-
-        {/* Widget Próximas Entregas */}
-        <Card className="p-6 lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3 tracking-tight">
-              <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
-                <ListTodo size={22} />
-              </div>
-              Próximas Entregas
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {assignments.filter(a => a.status !== 'completed' && new Date(a.dueDate) >= new Date()).slice(0, 3).map(task => {
-              const daysLeft = Math.ceil((new Date(task.dueDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-              const isUrgent = daysLeft <= 2;
-              return (
-                <div key={task.id} className={`p-4 rounded-xl border-2 ${isUrgent ? 'border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/10' : 'border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20'}`}>
-                  <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-1 line-clamp-1">{task.title}</h4>
-                  <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-3">{task.subjectName}</p>
-                  <div className="flex items-center justify-between">
-                    <div className={`text-xs font-bold px-2 py-1 rounded-md ${isUrgent ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
-                      {daysLeft === 0 ? 'Hoje' : daysLeft === 1 ? 'Amanhã' : `Faltam ${daysLeft} dias`}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                      <Calendar size={12} />
-                      {new Date(task.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            {assignments.filter(a => a.status !== 'completed' && new Date(a.dueDate) >= new Date()).length === 0 && (
-              <div className="col-span-full py-8 text-center">
-                <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-300 dark:text-slate-700">
-                  <ListTodo size={24} />
-                </div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-500 italic">
-                  Nenhuma entrega próxima. Você está em dia!
-                </p>
-              </div>
-            )}
           </div>
         </Card>
       </div>
