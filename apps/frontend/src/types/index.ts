@@ -16,3 +16,13 @@ export interface Occurrence {
   category: 'Falta' | 'Atraso' | 'Advertência' | 'Suspensão';
   date: string;
 }
+
+export interface Assignment {
+  id: string;
+  title: string;
+  description?: string;
+  subjectId: string;
+  subjectName?: string;
+  dueDate: string;
+  status: 'pending' | 'completed';
+}

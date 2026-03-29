@@ -37,6 +37,7 @@ export const occurrences = pgTable('occurrences', {
 export const usersRelations = relations(users, ({ many }) => ({
   subjects: many(subjects),
   occurrences: many(occurrences),
+  assignments: many(assignments),
 }));
 
 export const subjectsRelations = relations(subjects, ({ one, many }) => ({
@@ -45,6 +46,7 @@ export const subjectsRelations = relations(subjects, ({ one, many }) => ({
     references: [users.id],
   }),
   occurrences: many(occurrences),
+  assignments: many(assignments),
 }));
 
 export const occurrencesRelations = relations(occurrences, ({ one }) => ({
@@ -57,3 +59,27 @@ export const occurrencesRelations = relations(occurrences, ({ one }) => ({
     references: [subjects.id],
   }),
 }));
+
+export const assignments = pgTable('assignments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  subjectId: uuid('subject_id').references(() => subjects.id, { onDelete: 'cascade' }).notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
+  dueDate: timestamp('due_date').notNull(),
+  status: text('status').notNull().default('pending'), // 'pending' or 'completed'
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const assignmentsRelations = relations(assignments, ({ one }) => ({
+  user: one(users, {
+    fields: [assignments.userId],
+    references: [users.id],
+  }),
+  subject: one(subjects, {
+    fields: [assignments.subjectId],
+    references: [subjects.id],
+  }),
+}));
+

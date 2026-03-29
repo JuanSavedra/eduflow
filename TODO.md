@@ -4,10 +4,10 @@ Este arquivo detalha as novas funcionalidades que serão implementadas para tran
 
 ## 1. Gestão de Tarefas e Prazos (Assignments) 📝
 *Objetivo: Ajudar o estudante a não perder datas de entrega e provas.*
-- [ ] Criar nova página/view de "Tarefas".
-- [ ] Permitir vincular tarefas a uma Disciplina existente.
-- [ ] Adicionar status (Pendente, Concluída, Atrasada).
-- [ ] **Dashboard**: Widget de "Próximas Entregas" com contagem regressiva.
+- [x] Criar nova página/view de "Tarefas".
+- [x] Permitir vincular tarefas a uma Disciplina existente.
+- [x] Adicionar status (Pendente, Concluída, Atrasada).
+- [x] **Dashboard**: Widget de "Próximas Entregas" com contagem regressiva.
 
 ## 2. Simulador de Notas ("Quanto eu preciso?") 🧮
 *Objetivo: Cálculo automático da nota necessária para aprovação.*

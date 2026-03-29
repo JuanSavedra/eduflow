@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { TrendingUp, Clock, BookOpen, AlertCircle, RotateCcw, Filter } from 'lucide-react';
+import { TrendingUp, Clock, BookOpen, AlertCircle, RotateCcw, Filter, ListTodo, Calendar } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -7,11 +7,13 @@ import {
 } from 'recharts';
 import { Card } from '../components/ui/Card';
 import { useAppContext } from '../context/AppContext';
+import { useAssignments } from '../context/AssignmentsContext';
 
 type FilterType = 'monthYear' | 'period';
 
 export const DashboardView = () => {
   const { globalAverage, totalAbsences, subjects, occurrences, calculateAverage, isDarkMode } = useAppContext();
+  const { assignments } = useAssignments();
 
   // Estados para os filtros
   const [filterType, setFilterType] = useState<FilterType>('monthYear');
@@ -401,6 +403,49 @@ export const DashboardView = () => {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* Widget Próximas Entregas */}
+        <Card className="p-6 lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3 tracking-tight">
+              <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+                <ListTodo size={22} />
+              </div>
+              Próximas Entregas
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {assignments.filter(a => a.status !== 'completed' && new Date(a.dueDate) >= new Date()).slice(0, 3).map(task => {
+              const daysLeft = Math.ceil((new Date(task.dueDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+              const isUrgent = daysLeft <= 2;
+              return (
+                <div key={task.id} className={`p-4 rounded-xl border-2 ${isUrgent ? 'border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/10' : 'border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20'}`}>
+                  <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-1 line-clamp-1">{task.title}</h4>
+                  <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-3">{task.subjectName}</p>
+                  <div className="flex items-center justify-between">
+                    <div className={`text-xs font-bold px-2 py-1 rounded-md ${isUrgent ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
+                      {daysLeft === 0 ? 'Hoje' : daysLeft === 1 ? 'Amanhã' : `Faltam ${daysLeft} dias`}
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                      <Calendar size={12} />
+                      {new Date(task.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {assignments.filter(a => a.status !== 'completed' && new Date(a.dueDate) >= new Date()).length === 0 && (
+              <div className="col-span-full py-8 text-center">
+                <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-300 dark:text-slate-700">
+                  <ListTodo size={24} />
+                </div>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-500 italic">
+                  Nenhuma entrega próxima. Você está em dia!
+                </p>
+              </div>
+            )}
           </div>
         </Card>
       </div>

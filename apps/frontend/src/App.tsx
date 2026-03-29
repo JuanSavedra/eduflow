@@ -2,10 +2,12 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './index.css';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AssignmentsProvider } from './context/AssignmentsContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { DashboardView } from './views/DashboardView';
 import { SubjectsView } from './views/SubjectsView';
 import { OccurrencesView } from './views/OccurrencesView';
+import { AssignmentsView } from './views/AssignmentsView';
 import { AIView } from './views/AIView';
 import { LoginView } from './views/LoginView';
 import { RegisterView } from './views/RegisterView';
@@ -66,6 +68,7 @@ const AppRoutes = () => {
         <Route path="dashboard" element={<DashboardView />} />
         <Route path="subjects" element={<SubjectsView />} />
         <Route path="occurrences" element={<OccurrencesView />} />
+        <Route path="assignments" element={<AssignmentsView />} />
         <Route path="ai" element={<AIView />} />
         <Route path="settings" element={<SettingsView />} />
       </Route>
@@ -80,7 +83,9 @@ const App = () => {
   return (
     <AuthProvider>
       <AppProvider>
-        <AppRoutes />
+        <AssignmentsProvider>
+          <AppRoutes />
+        </AssignmentsProvider>
       </AppProvider>
     </AuthProvider>
   );
